@@ -28,7 +28,7 @@ router.get('/today', async (req, res) => {
       JOIN films f ON s.film_id = f.film_id
       JOIN halls h ON s.hall_id = h.hall_id
       JOIN hall_types ht ON h.type_id = ht.type_id
-      WHERE DATE(s.start_time) = ?
+      WHERE s.is_active = TRUE
       AND s.is_active = TRUE
       ORDER BY s.start_time
     `, { replacements: [today] });
