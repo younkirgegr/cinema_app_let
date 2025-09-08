@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: cinema-db
+    environment:
+      MYSQL_DATABASE: cinema
+      MYSQL_USER: cinema_user
+      MYSQL_PASSWORD: cinema_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./sql/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    restart: unless-stopped

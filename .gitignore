@@ -1,0 +1,25 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.pnpm-debug.log
+
+# Environment variables
+.env
+.env.local
+
+# Build files
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+
+# IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
