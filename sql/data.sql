@@ -38,13 +38,17 @@ INSERT INTO films (title, genre_id, duration_min, rating, description) VALUES
 ('Оно', 5, 135, '16+', 'Ужасы о клоуне Пеннивайсе'),
 ('Достать ножи', 3, 130, '16+', 'Детектив с неожиданной развязкой');
 
+-- Администратор
+INSERT INTO users (first_name, last_name, email, password_hash, role_id, phone) VALUES
+('Администратор', 'Системы', 'admin@mail.ru', '$2b$10$jZ2E67MIdtlbVPqWtM5gpuJkX0e1qcetBaRruVRvvJU4E2/RcZWzm', 3, '89991234567');
+
 -- Пользователи
-INSERT INTO users (last_name, first_name, phone, email, password_hash) VALUES
-('Иванов', 'Иван', '79101112233', 'ivanov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u'),
-('Петрова', 'Мария', '79112223344', 'petrova@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u'),
-('Сидоров', 'Алексей', '79123334455', 'sidorov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u'),
-('Кузнецова', 'Елена', '79134445566', 'kuznetsova@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u'),
-('Смирнов', 'Дмитрий', '79145556677', 'smirnov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u');
+INSERT INTO users (first_name, last_name, phone, email, password_hash, role_id) VALUES
+('Иван', 'Иванов', '79101112233', 'ivanov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u', 2),
+('Мария', 'Петрова', '79112223344', 'petrova@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u', 1),
+('Алексей', 'Сидоров', '79123334455', 'sidorov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u', 1),
+('Елена', 'Кузнецова', '79134445566', 'kuznetsova@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u', 1),
+('Дмитрий', 'Смирнов', '79145556677', 'smirnov@mail.ru', '$2b$10$IfWq9X5yqY4Zq9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5Zq9Z5uO5q9Z5u', 1);
 
 -- Привязка ролей
 INSERT INTO user_roles (user_id, role_id) VALUES

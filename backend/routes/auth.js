@@ -63,13 +63,15 @@ router.post('/login', async (req, res) => {
     );
 
     // Возвращаем токен и данные пользователя
+   // backend/routes/auth.js
     res.json({
       token,
       user: {
         user_id: user.user_id,
         first_name: user.first_name,
         last_name: user.last_name,
-        email: user.email
+        email: user.email,
+        role_id: user.role_id  // ✅ Если поле есть
       }
     });
 

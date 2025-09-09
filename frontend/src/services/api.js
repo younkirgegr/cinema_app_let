@@ -42,3 +42,40 @@ export const sellTicket = (data) => {
     body: JSON.stringify(data)
   }).then(res => res.json());
 };
+
+export const getMyTickets = () => {
+  return fetch(`${API_BASE}/tickets/my`, {
+    headers: getHeaders()
+  }).then(res => res.json());
+};
+
+
+export const getOccupiedSeats = (screeningId) => {
+  return fetch(`${API_BASE}/tickets/occupied/${screeningId}`, {
+    headers: getHeaders()
+  }).then(res => res.json());
+};
+
+// src/services/api.js
+export const addFilm = (data) => {
+  return fetch(`${API_BASE}/films`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+};
+
+export const updateFilm = (filmId, data) => {
+  return fetch(`${API_BASE}/films/${filmId}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+};
+
+export const deleteFilm = (filmId) => {
+  return fetch(`${API_BASE}/films/${filmId}`, {
+    method: 'DELETE',
+    headers: getHeaders()
+  }).then(res => res.json());
+};

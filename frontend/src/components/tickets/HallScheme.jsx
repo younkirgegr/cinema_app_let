@@ -1,31 +1,45 @@
 // src/components/tickets/HallScheme.jsx
 import { useState, useEffect } from 'react';
-import { getScreeningsToday, sellTicket } from '../../services/api';
+import { getScreeningsToday, sellTicket, getOccupiedSeats } from '../../services/api';
 
 export default function HallScheme() {
   const [screenings, setScreenings] = useState([]);
   const [selectedScreening, setSelectedScreening] = useState(null);
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [occupiedSeats, setOccupiedSeats] = useState([]);
 
-  // Загружаем сеансы на сегодня
+  // Загружаем сеансы
   useEffect(() => {
     getScreeningsToday().then(data => {
       setScreenings(data);
-    }).catch(err => {
-      console.error('Ошибка загрузки сеансов:', err);
     });
   }, []);
 
+  // Загружаем занятые места при выборе сеанса
+  useEffect(() => {
+    if (selectedScreening) {
+      getOccupiedSeats(selectedScreening.screening_id)
+        .then(seats => setOccupiedSeats(seats))
+        .catch(err => {
+          console.error('Ошибка загрузки занятых мест:', err);
+          setOccupiedSeats([]);
+        });
+    } else {
+      setOccupiedSeats([]);
+    }
+  }, [selectedScreening]);
+
   const handleSeatClick = (seatId) => {
+    if (occupiedSeats.includes(seatId)) {
+      alert('Место уже занято!');
+      return;
+    }
     setSelectedSeat(seatId);
   };
 
   const handleBuy = () => {
-    if (!selectedSeat || !selectedScreening) {
-      alert('Выберите сеанс и место');
-      return;
-    }
+    if (!selectedSeat || !selectedScreening) return;
 
     setLoading(true);
     sellTicket({
@@ -35,6 +49,8 @@ export default function HallScheme() {
     })
     .then(() => {
       alert('✅ Билет успешно куплен!');
+      // Обновляем список занятых мест
+      setOccupiedSeats(prev => [...prev, selectedSeat]);
       setSelectedSeat(null);
     })
     .catch(err => {
@@ -87,18 +103,27 @@ export default function HallScheme() {
               <div key={row + 1} style={{ display: 'flex', gap: '5px' }}>
                 {Array.from({ length: 15 }, (_, col) => {
                   const seatId = row * 15 + col + 1;
+                  const isOccupied = occupiedSeats.includes(seatId);
+                  const isSelected = selectedSeat === seatId;
+
                   return (
                     <button
                       key={seatId}
                       onClick={() => handleSeatClick(seatId)}
+                      disabled={isOccupied}
                       style={{
                         width: '30px',
                         height: '30px',
-                        backgroundColor: selectedSeat === seatId ? '#28a745' : '#f8f9fa',
+                        backgroundColor: isOccupied 
+                          ? '#ccc' 
+                          : isSelected 
+                            ? '#28a745' 
+                            : '#f8f9fa',
                         border: '1px solid #dee2e6',
                         borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
+                        cursor: isOccupied ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        opacity: isOccupied ? 0.6 : 1
                       }}
                     >
                       {seatId}
