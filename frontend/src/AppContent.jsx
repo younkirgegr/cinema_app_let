@@ -196,40 +196,27 @@ export default function AppContent() {
         </div>
       </header>
 
-      {/* Карусель */}
-      <div style={{
-        position: 'relative',
+      // В AppContent.jsx
+    {/* Карусель */}
+    <div style={{
+    position: 'relative',
+    width: '100%',
+    height: '400px',
+    overflow: 'hidden',
+    borderRadius: '12px',
+    marginBottom: '30px'
+    }}>
+    <img
+        src="/posters/banner.jpg"
+        alt="Баннер"
+        style={{
         width: '100%',
-        height: '400px',
-        overflow: 'hidden',
-        borderRadius: '12px',
-        marginBottom: '30px'
-      }}>
-        {films.length > 0 ? (
-          <img
-            src={films[0]?.poster_url || '/posters/1.jpg'}
-            alt={films[0]?.title || 'Карусель'}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              borderRadius: '12px'
-            }}
-          />
-        ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#ddd',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: '12px'
-          }}>
-            Нет фильмов
-          </div>
-        )}
-      </div>
+        height: '100%',
+        objectFit: 'cover',
+        borderRadius: '12px'
+        }}
+    />
+    </div>
 
       {/* Кнопки выбора дня */}
       <div style={{
