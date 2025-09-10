@@ -16,7 +16,7 @@ app.use(express.json());
 const filmRoutes = require('./routes/films');
 const authRoutes = require('./routes/auth');
 const screeningsRoutes = require('./routes/screenings');
-const ticketsRouter = require('./routes/tickets');
+const ticketsRoutes = require('./routes/tickets');
 const adminRoutes = require('./routes/admin');
 const myTicketsRoutes = require('./routes/my-tickets');
 const reviewsRoutes = require('./routes/reviews');
@@ -25,7 +25,7 @@ const reviewsRoutes = require('./routes/reviews');
 app.use('/api/films', filmRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/screenings', screeningsRoutes);
-app.use('/api/tickets', ticketsRouter);
+app.use('/api/tickets', ticketsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewsRoutes);
 

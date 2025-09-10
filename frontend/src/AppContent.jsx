@@ -123,7 +123,6 @@ export default function AppContent() {
         paddingBottom: '10px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Логотип" style={{ width: '60px', height: '60px' }} />
           <h1 style={{ margin: '0', fontSize: '28px', color: '#333' }}>КиноМир</h1>
         </div>
 
@@ -241,21 +240,24 @@ export default function AppContent() {
           Скоро в кино
         </button>
 
-        <button style={{
-          padding: '10px 20px',
-          backgroundColor: '#ffc107',
-          color: 'black',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}>
-          Расписание
-        </button>
+        <button
+            onClick={() => window.location.href = '/schedule'}
+            style={{
+                padding: '10px 20px',
+                backgroundColor: '#ffc107',
+                color: 'black',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+        }}
+        >
+            Расписание
+            </button>
       </div>
 
       {/* ОСНОВНАЯ АФИША */}
       <div style={{ marginBottom: '50px' }}>
-        <h2>🎬 Сейчас в кино</h2>
+        <h2> Сейчас в кино</h2>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -306,7 +308,7 @@ export default function AppContent() {
 
       {/* СКОРО В КИНО */}
       <div style={{ marginBottom: '50px' }}>
-        <h2>🔜 Скоро в кино</h2>
+        <h2> Скоро в кино</h2>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',

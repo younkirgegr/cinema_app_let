@@ -6,7 +6,7 @@ const getHeaders = () => {
   const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    'Authorization': token ? `Bearer ${token}` : ''
   };
 };
 
@@ -43,9 +43,10 @@ export const sellTicket = (data) => {
   }).then(res => res.json());
 };
 
+// src/services/api.js
 export const getMyTickets = () => {
-  return fetch(`${API_BASE}/tickets/my`, {
-    headers: getHeaders()
+  return fetch(`${API_BASE}/my-tickets`, {
+    headers: getHeaders() // с токеном
   }).then(res => res.json());
 };
 
@@ -90,6 +91,13 @@ export const getFilmById = (filmId) => {
 // src/services/api.js
 export const getScreeningsByFilmId = (filmId) => {
   return fetch(`${API_BASE}/screenings/film/${filmId}`, {
+    headers: getHeaders()
+  }).then(res => res.json());
+};
+
+// src/services/api.js
+export const getFilmsWithScreenings = (day) => {
+  return fetch(`${API_BASE}/films-with-screenings?day=${day}`, {
     headers: getHeaders()
   }).then(res => res.json());
 };
