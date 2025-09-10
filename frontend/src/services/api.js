@@ -79,3 +79,17 @@ export const deleteFilm = (filmId) => {
     headers: getHeaders()
   }).then(res => res.json());
 };
+
+// src/services/api.js
+export const getFilmById = (filmId) => {
+  return fetch(`${API_BASE}/films/${filmId}`, {
+    headers: getHeaders()
+  }).then(res => res.json());
+};
+
+// src/services/api.js
+export const getScreeningsByFilmId = (filmId) => {
+  return fetch(`${API_BASE}/screenings/film/${filmId}`, {
+    headers: getHeaders()
+  }).then(res => res.json());
+};

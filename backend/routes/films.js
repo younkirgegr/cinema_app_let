@@ -102,4 +102,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+// backend/routes/films.js
+router.get('/:filmId', async (req, res) => {
+  const { filmId } = req.params;
+
+  try {
+    const [films] = await sequelize.query(`
+      SELECT f.*, g.genre_name
+      FROM films f
+      JOIN genres g ON f.genre_id = g.genre_id
+      WHERE f.film_id = ?
+    `, { replacements: [filmId] });
+
+    if (films.length === 0) {
+      return res.status(404).json({ error: 'Фильм не найден' });
+    }
+
+    res.json(films[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при получении фильма' });
+  }
+});
+
 module.exports = router;
