@@ -1,4 +1,3 @@
-// src/pages/MyTicketsPage.jsx
 import { useState, useEffect } from 'react';
 import { getMyTickets } from '../services/api';
 
@@ -111,7 +110,6 @@ export default function MyTicketsPage() {
         ))}
       </div>
 
-      {/* Футер */}
       <footer style={{
         textAlign: 'center',
         padding: '20px',
