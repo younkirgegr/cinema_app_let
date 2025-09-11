@@ -1,12 +1,7 @@
-// backend/routes/films.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 
-/**
- * GET /api/films
- * Возвращает фильмы с фильтрацией по жанру и поиску
- */
 router.get('/', async (req, res) => {
   const { search, genre } = req.query;
 
@@ -47,10 +42,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-/**
- * POST /api/films
- * Добавление нового фильма (только для администратора)
- */
 router.post('/', async (req, res) => {
   const { title, genre_id, duration_min, rating } = req.body;
 
@@ -64,7 +55,6 @@ router.post('/', async (req, res) => {
     const token = authHeader.split(' ')[1];
     const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 
-    // Проверка роли: только администратор (role_id = 3)
     if (payload.role_id !== 3) {
       return res.status(403).json({ error: 'Доступ запрещён' });
     }
@@ -94,7 +84,7 @@ router.post('/', async (req, res) => {
       genre_id,
       duration_min,
       rating,
-      avg_rating: rating // Пока отзывов нет
+      avg_rating: rating 
     });
   } catch (err) {
     console.error(err);
@@ -102,7 +92,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// backend/routes/films.js
 router.get('/:filmId', async (req, res) => {
   const { filmId } = req.params;
 
@@ -125,7 +114,6 @@ router.get('/:filmId', async (req, res) => {
   }
 });
 
-// backend/routes/films.js
 router.get('/with-screenings', async (req, res) => {
   const { day } = req.query;
 
