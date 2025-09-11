@@ -1,5 +1,3 @@
-﻿-- sql/data.sql
-
 -- Роли
 INSERT INTO roles (role_id, role_name) VALUES
 (1, 'Посетитель'),
