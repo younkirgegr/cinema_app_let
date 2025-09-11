@@ -1,9 +1,8 @@
-// src/services/api.js
 const API_BASE = 'http://localhost:5000/api';
 
-// Общие заголовки
 const getHeaders = () => {
   const token = localStorage.getItem('token');
+  
   return {
     'Content-Type': 'application/json',
     'Authorization': token ? `Bearer ${token}` : ''
@@ -43,7 +42,6 @@ export const sellTicket = (data) => {
   }).then(res => res.json());
 };
 
-// src/services/api.js
 export const getMyTickets = () => {
   return fetch(`${API_BASE}/my-tickets`, {
     headers: getHeaders() // с токеном
@@ -51,13 +49,17 @@ export const getMyTickets = () => {
 };
 
 
-export const getOccupiedSeats = (screeningId) => {
-  return fetch(`${API_BASE}/tickets/occupied/${screeningId}`, {
-    headers: getHeaders()
-  }).then(res => res.json());
+export const getScreeningDetails = (screeningId) => {
+  return fetch(`${API_BASE}/screenings/details/${screeningId}`, { headers: getHeaders() }).then(res => res.json());
 };
 
-// src/services/api.js
+export const getOccupiedSeats = async (screeningId) => {
+  const response = await fetch(`${API_BASE}/tickets/occupied/${screeningId}`, {
+    headers: getHeaders()
+  });
+  return response.json();
+};
+
 export const addFilm = (data) => {
   return fetch(`${API_BASE}/films`, {
     method: 'POST',
@@ -81,23 +83,22 @@ export const deleteFilm = (filmId) => {
   }).then(res => res.json());
 };
 
-// src/services/api.js
 export const getFilmById = (filmId) => {
   return fetch(`${API_BASE}/films/${filmId}`, {
     headers: getHeaders()
   }).then(res => res.json());
 };
 
-// src/services/api.js
 export const getScreeningsByFilmId = (filmId) => {
   return fetch(`${API_BASE}/screenings/film/${filmId}`, {
     headers: getHeaders()
-  }).then(res => res.json());
+  })
+    .then(res => res.json());
 };
 
-// src/services/api.js
 export const getFilmsWithScreenings = (day) => {
   return fetch(`${API_BASE}/films-with-screenings?day=${day}`, {
     headers: getHeaders()
   }).then(res => res.json());
 };
+

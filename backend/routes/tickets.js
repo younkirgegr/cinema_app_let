@@ -1,17 +1,13 @@
-// backend/routes/tickets.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 
-/**
- * POST /api/tickets/sell
- * Продажа билета
- */
+
 router.post('/sell', async (req, res) => {
   const { screening_id, seat_id, user_id } = req.body;
 
   try {
-    // Проверка: сеанс существует?
+    // Проверка: сеанс существует
     const [screening] = await sequelize.query(`
       SELECT s.screening_id, s.capacity, s.base_price
       FROM screenings s
@@ -27,7 +23,7 @@ router.post('/sell', async (req, res) => {
       return res.status(400).json({ error: 'Цена сеанса не указана' });
     }
 
-    // Проверка: место свободно?
+    // Проверка: место свободно
     const [takenSeats] = await sequelize.query(`
       SELECT seat_id
       FROM tickets t
@@ -45,11 +41,11 @@ router.post('/sell', async (req, res) => {
       VALUES (?, ?, ?, ?)
     `, { 
       replacements: [screening_id, seat_id, user_id, screening[0].base_price],
-      type: sequelize.QueryTypes.INSERT // Явно указываем тип
+      type: sequelize.QueryTypes.INSERT 
     });
 
     // Получаем ID вставленной записи
-    const ticketId = result; // Для `sequelize` — это просто ID
+    const ticketId = result; 
 
     res.json({
       ticket_id: ticketId,
@@ -64,11 +60,7 @@ router.post('/sell', async (req, res) => {
   }
 });
 
-/**
- * GET /api/tickets/my
- * Возвращает билеты пользователя
- */
-// backend/routes/tickets.js
+
 router.get('/my', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -80,7 +72,6 @@ router.get('/my', async (req, res) => {
     const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
     const user_id = payload.user_id;
 
-    // Проверка: user_id существует?
     if (!user_id) {
       return res.status(401).json({ error: 'Неверный токен' });
     }
@@ -109,11 +100,6 @@ router.get('/my', async (req, res) => {
   }
 });
 
-// backend/routes/tickets.js
-/**
- * GET /api/tickets/occupied/:screening_id
- * Возвращает список занятых мест
- */
 router.get('/occupied/:screening_id', async (req, res) => {
   const { screening_id } = req.params;
 

@@ -1,4 +1,3 @@
-// middleware/role.js
 const sequelize = require('../config/database');
 
 const checkRole = (roles) => {

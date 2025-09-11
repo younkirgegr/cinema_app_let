@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 
 const express = require('express');
@@ -8,7 +7,6 @@ const sequelize = require('./config/database');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -28,23 +26,20 @@ app.use('/api/screenings', screeningsRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/my-tickets', myTicketsRoutes);
 
-// Главная страница (проверка)
-app.get('/', (req, res) => {
-  res.send('🎉 Бэкенд кинотеатра работает!');
-});
 
-// Подключение к базе и запуск сервера
+
 sequelize.authenticate()
   .then(() => {
-    console.log('✅ Подключение к базе данных успешно');
+    console.log(' Подключение к базе данных успешно');
     app.listen(PORT, () => {
-      console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+      console.log(` Сервер запущен на http://localhost:${PORT}`);
     });
   })
   .catch(err => {
-    console.error('❌ Ошибка подключения к базе:', err);
+    console.error(' Ошибка подключения к базе:', err);
     app.listen(PORT, () => {
-      console.log(`⚠️ База недоступна, но сервер запущен`);
+      console.log(` База недоступна, но сервер запущен`);
     });
   });

@@ -1,4 +1,3 @@
-// models/Film.js
 module.exports = (sequelize, DataTypes) => {
   const Film = sequelize.define('Film', {
     film_id: {

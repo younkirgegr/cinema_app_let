@@ -1,4 +1,3 @@
-// src/AppContent.jsx
 import { useState, useEffect } from 'react';
 import LoginForm from './components/auth/LoginForm';
 import { getFilms } from './services/api';
@@ -19,13 +18,18 @@ export default function AppContent() {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({
-          first_name: payload.first_name || 'Пользователь',
-          role_id: payload.role_id,
-          user_id: payload.user_id
-        });
-      } catch (err) {
-        console.error('Invalid token', err);
+        setUser({ first_name: payload.first_name || 'Пользователь', role_id: payload.role_id });
+      } catch (e) {
+        localStorage.removeItem('token');
+      }
+    }
+
+    const path = window.location.pathname;
+    if (path.startsWith('/tickets/')) {
+      const screeningId = path.split('/')[2];
+      if (screeningId) {
+        alert(`Вы выбрали сеанс №${screeningId}. Здесь будет выбор мест.`);
+        window.history.pushState({}, '', '/'); 
       }
     }
   }, []);
@@ -152,7 +156,7 @@ export default function AppContent() {
                 fontSize: '16px'
               }}
             >
-              🔍
+              
             </button>
           </div>
           {user ? (
@@ -405,8 +409,15 @@ export default function AppContent() {
           selectedDay={selectedDay}
           onClose={() => setShowHallScheme(false)}
           onSelectSession={(session) => {
-            console.log('Выбран сеанс:', session);
-            window.location.href = `/tickets?screening_id=${session.screening_id}`;
+            // Проверка авторизации
+            const token = localStorage.getItem('token');
+            if (!token) {
+              alert('Пожалуйста, войдите в аккаунт');
+              return;
+            }
+
+            // Используем navigate для SPA-перехода
+            window.location.href = `/tickets/${session.screening_id}`;
           }}
         />
       )}

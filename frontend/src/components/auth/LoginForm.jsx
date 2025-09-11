@@ -1,4 +1,3 @@
-// src/components/auth/LoginForm.jsx
 import { useState } from 'react';
 import { login } from '../../services/api';
 

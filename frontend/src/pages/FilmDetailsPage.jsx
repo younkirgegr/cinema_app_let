@@ -1,4 +1,3 @@
-// src/pages/FilmDetailsPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import HallScheme from '../components/tickets/HallScheme';
@@ -181,7 +180,7 @@ export default function FilmDetailsPage() {
           onMouseOver={(e) => e.target.style.backgroundColor = '#d00713'}
           onMouseOut={(e) => e.target.style.backgroundColor = '#e50914'}
         >
-          🎟️ Купить билет
+           Купить билет
         </button>
       </div>
 

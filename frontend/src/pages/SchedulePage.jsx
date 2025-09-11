@@ -1,4 +1,3 @@
-// src/pages/SchedulePage.jsx
 import { useState, useEffect } from 'react';
 import { getFilmsWithScreenings } from '../services/api';
 
@@ -99,29 +98,6 @@ export default function SchedulePage() {
             borderRadius: '12px'
           }}
         />
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          color: 'white',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-          textAlign: 'center',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          padding: '20px',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          borderRadius: '12px',
-          maxWidth: '600px'
-        }}>
-          <h2 style={{ margin: '0', fontSize: '48px' }}>Дракула</h2>
-          <p style={{ margin: '10px 0', fontSize: '18px' }}>
-            Новый блокбастер Люка Бессона
-          </p>
-          <p style={{ margin: '10px 0', fontSize: '18px' }}>
-            В кино с 11 сентября
-          </p>
-        </div>
       </div>
 
       {/* Кнопки выбора дня */}

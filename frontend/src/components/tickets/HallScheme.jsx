@@ -1,17 +1,16 @@
-// src/components/tickets/HallScheme.jsx
 import { useState, useEffect } from 'react';
 import { getScreeningsByFilmId } from '../../services/api';
 
 export default function HallScheme({ film, onClose, onSelectSession }) {
   const [screenings, setScreenings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState('today'); // состояние дня
+  const [selectedDay, setSelectedDay] = useState('today'); 
 
   // Загружаем сеансы
   useEffect(() => {
     getScreeningsByFilmId(film.film_id)
       .then(data => {
-        console.log('Все сеансы из API:', data); // 🔍 Видно ли?
+        console.log('Все сеансы из API:', data); 
         setScreenings(Array.isArray(data) ? data : []);
       })
       .catch(err => {
@@ -20,13 +19,12 @@ export default function HallScheme({ film, onClose, onSelectSession }) {
       .finally(() => setLoading(false));
   }, [film.film_id]);
 
-  // ✅ Сюда вставляй фильтрацию по дате
-  const today = new Date().toISOString().split('T')[0]; // '2025-09-10'
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // '2025-09-11'
+  const today = new Date().toISOString().split('T')[0]; 
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]; 
 
   const filteredSessions = screenings.filter(session => {
     if (!session.start_time) return false;
-    const sessionDate = session.start_time.split('T')[0]; // '2025-09-10'
+    const sessionDate = session.start_time.split('T')[0]; 
     return (selectedDay === 'today' && sessionDate === today) ||
           (selectedDay === 'tomorrow' && sessionDate === tomorrow);
   });
@@ -218,24 +216,6 @@ export default function HallScheme({ film, onClose, onSelectSession }) {
           </p>
         )}
 
-        {/* Кнопка "Купить билет" */}
-        <div style={{ textAlign: 'center' }}>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#e50914',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold'
-            }}
-          >
-            🎟️ Купить билет
-          </button>
-        </div>
       </div>
     </div>
   );

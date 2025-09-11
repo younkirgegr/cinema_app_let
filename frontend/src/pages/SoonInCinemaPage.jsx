@@ -1,4 +1,3 @@
-// src/pages/SoonInCinemaPage.jsx
 import { useState } from 'react';
 import HallScheme from '../components/tickets/HallScheme';
 
@@ -7,7 +6,6 @@ export default function SoonInCinemaPage() {
   const [selectedFilm, setSelectedFilm] = useState(null);
 
   // Фиксированный список "Скоро в кино"
-
   const comingSoon = [
     {
       film_id: 102,

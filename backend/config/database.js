@@ -1,4 +1,3 @@
-// backend/config/db.js
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize('cinema', 'root', 'masha2005', {
@@ -7,4 +6,4 @@ const sequelize = new Sequelize('cinema', 'root', 'masha2005', {
   logging: false
 });
 
-module.exports = sequelize; // ← без фигурных скобок!
+module.exports = sequelize; 

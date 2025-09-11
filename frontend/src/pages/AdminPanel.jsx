@@ -1,4 +1,3 @@
-// src/pages/AdminPanel.jsx
 import { useState, useEffect } from 'react';
 import { getFilms, addFilm, updateFilm, deleteFilm } from '../services/api';
 
@@ -13,7 +12,6 @@ export default function AdminPanel() {
   useEffect(() => {
     getFilms({ search })
       .then(data => {
-        // Добавляем заглушки для полей, если их нет
         const enrichedFilms = (Array.isArray(data) ? data : []).map(film => ({
           ...film,
           release_date: film.release_date || '2025-01-01',

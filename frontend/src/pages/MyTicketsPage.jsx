@@ -1,4 +1,3 @@
-// src/pages/MyTicketsPage.jsx
 import { useState, useEffect } from 'react';
 import { getMyTickets } from '../services/api';
 
@@ -10,15 +9,15 @@ export default function MyTicketsPage() {
   useEffect(() => {
     getMyTickets()
       .then(data => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setTickets(data);
         } else {
-          setError('Нет купленных билетов');
+          setError('У вас пока нет купленных билетов');
         }
       })
       .catch(err => {
         console.error('Ошибка загрузки билетов:', err);
-        setError('Не удалось загрузить билеты. Проверьте авторизацию.');
+        setError('Не удалось загрузить билеты. Проверьте подключение или войдите снова.');
       })
       .finally(() => {
         setLoading(false);
@@ -43,7 +42,6 @@ export default function MyTicketsPage() {
         paddingBottom: '10px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Логотип" style={{ width: '60px', height: '60px' }} />
           <h1 style={{ margin: '0', fontSize: '28px', color: '#333' }}>КиноМир</h1>
         </div>
 
@@ -63,7 +61,7 @@ export default function MyTicketsPage() {
       </header>
 
       {/* Заголовок */}
-      <h2 style={{ marginBottom: '20px' }}>🎟 Мои билеты</h2>
+      <h2 style={{ marginBottom: '20px' }}> Мои билеты</h2>
 
       {/* Загрузка */}
       {loading && <p>Загрузка билетов...</p>}
@@ -92,7 +90,7 @@ export default function MyTicketsPage() {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}>
             <img
-              src={ticket.poster_url}
+              src={ticket.poster_url || `/posters/${ticket.film_id}.jpg`}
               alt={ticket.title}
               style={{
                 width: '100%',
@@ -102,8 +100,9 @@ export default function MyTicketsPage() {
             />
             <div style={{ padding: '16px' }}>
               <h3>{ticket.title}</h3>
-              <p><strong>Зал:</strong> {ticket.hall_name}</p>
+              <p><strong>Жанр:</strong> {ticket.genre_name}</p>
               <p><strong>Время:</strong> {ticket.start_time}</p>
+              <p><strong>Зал:</strong> {ticket.hall_name}</p>
               <p><strong>Место:</strong> Ряд {ticket.row_num}, Место {ticket.seat_num}</p>
               <p><strong>Цена:</strong> {ticket.price} ₽</p>
             </div>
