@@ -1,4 +1,3 @@
-// src/pages/SoonInCinemaPage.jsx
 import { useState } from 'react';
 import HallScheme from '../components/tickets/HallScheme';
 
@@ -189,7 +188,7 @@ export default function SoonInCinemaPage() {
 
       {/* Фильмы "Скоро в кино" */}
       <div style={{ marginBottom: '50px' }}>
-        <h2>🔜 Скоро в кино</h2>
+        <h2> Скоро в кино</h2>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
