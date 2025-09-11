@@ -1,13 +1,8 @@
-// routes/my-tickets.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 const auth = require('../middleware/auth');
 
-/**
- * GET /api/tickets/my
- * Возвращает историю покупок текущего пользователя
- */
 router.get('/my', auth, async (req, res) => {
   try {
     const [tickets] = await sequelize.query(`
@@ -38,7 +33,7 @@ router.get('/my', auth, async (req, res) => {
 
     res.json(tickets);
   } catch (err) {
-    console.error('❌ Ошибка при получении билетов:', err);
+    console.error(' Ошибка при получении билетов:', err);
     res.status(500).json({ error: 'Ошибка сервера при получении истории покупок' });
   }
 });
