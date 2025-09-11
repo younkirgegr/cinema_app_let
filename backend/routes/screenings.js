@@ -1,4 +1,3 @@
-// routes/screenings.js
 const express = require('express');
 const router = express.Router();
 const  sequelize  = require('../config/database');
@@ -7,7 +6,6 @@ router.get('/film/:filmId', async (req, res) => {
   const { filmId } = req.params;
 
   try {
-    // 🔁 Упрощённый запрос — без JOIN и условий
     const [screenings] = await sequelize.query(`
       SELECT 
         s.screening_id,
@@ -19,10 +17,10 @@ router.get('/film/:filmId', async (req, res) => {
       ORDER BY s.start_time
     `, { replacements: [filmId] });
 
-    console.log('Найдено сеансов:', screenings.length); // 🔍 Лог в терминал
+    console.log('Найдено сеансов:', screenings.length); 
     res.json(screenings);
   } catch (err) {
-    console.error('❌ Ошибка в /film/:filmId:', err); // 🔍 Вот сюда смотри!
+    console.error(' Ошибка в /film/:filmId:', err); 
     res.status(500).json({ error: 'Ошибка при получении сеансов' });
   }
 });
