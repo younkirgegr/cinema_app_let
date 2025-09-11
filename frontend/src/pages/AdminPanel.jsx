@@ -1,4 +1,4 @@
-// src/pages/AdminPanel.jsx
+
 import { useState, useEffect } from 'react';
 import { getFilms, addFilm, updateFilm, deleteFilm } from '../services/api';
 
