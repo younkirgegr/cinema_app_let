@@ -27,22 +27,18 @@ app.use('/api/tickets', ticketsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewsRoutes);
 
-// Главная страница (проверка)
-app.get('/', (req, res) => {
-  res.send('🎉 Бэкенд кинотеатра работает!');
-});
 
 // Подключение к базе и запуск сервера
 sequelize.authenticate()
   .then(() => {
-    console.log('✅ Подключение к базе данных успешно');
+    console.log(' Подключение к базе данных успешно');
     app.listen(PORT, () => {
-      console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
+      console.log(` Сервер запущен на http://localhost:${PORT}`);
     });
   })
   .catch(err => {
-    console.error('❌ Ошибка подключения к базе:', err);
+    console.error(' Ошибка подключения к базе:', err);
     app.listen(PORT, () => {
-      console.log(`⚠️ База недоступна, но сервер запущен`);
+      console.log(` База недоступна, но сервер запущен`);
     });
   });
