@@ -1,4 +1,3 @@
-// src/pages/ComingSoonPage.jsx
 import { useState } from 'react';
 
 export default function ComingSoonPage() {
@@ -81,7 +80,7 @@ export default function ComingSoonPage() {
                 fontSize: '16px'
               }}
             >
-              🔍
+              
             </button>
           </div>
           <button
