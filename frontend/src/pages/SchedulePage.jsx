@@ -1,4 +1,3 @@
-// src/pages/SchedulePage.jsx
 import { useState, useEffect } from 'react';
 import { getFilmsWithScreenings } from '../services/api';
 
