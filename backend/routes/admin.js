@@ -1,13 +1,8 @@
-// routes/admin.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 const checkRole = require('../middleware/role');
 
-/**
- * POST /api/admin/films
- * Добавляет новый фильм (только для администратора)
- */
 router.post('/films', checkRole(['Администратор']), async (req, res) => {
   const { title, genre_id, duration_min, rating, description } = req.body;
 
