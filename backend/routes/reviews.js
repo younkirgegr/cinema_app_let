@@ -1,18 +1,13 @@
-// routes/reviews.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 const auth = require('../middleware/auth');
 
-/**
- * POST /api/reviews
- * Добавить отзыв на фильм
- */
+
 router.post('/', auth, async (req, res) => {
   const { film_id, rating, comment } = req.body;
   const user_id = req.user.user_id;
 
-  // Проверка: переданы ли данные
   if (!film_id || !rating) {
     return res.status(400).json({ error: 'Требуются film_id и rating' });
   }
@@ -22,7 +17,6 @@ router.post('/', auth, async (req, res) => {
   }
 
   try {
-    // Проверка: пользователь уже оценивал фильм?
     const [existing] = await sequelize.query(
       'SELECT * FROM reviews WHERE film_id = ? AND user_id = ?',
       { replacements: [film_id, user_id] }
@@ -32,7 +26,6 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ error: 'Вы уже оставляли отзыв на этот фильм' });
     }
 
-    // Добавляем отзыв
     await sequelize.query(
       'INSERT INTO reviews (film_id, user_id, rating, comment) VALUES (?, ?, ?, ?)',
       { replacements: [film_id, user_id, rating, comment || null] }
@@ -40,15 +33,11 @@ router.post('/', auth, async (req, res) => {
 
     res.status(201).json({ message: 'Отзыв успешно добавлен' });
   } catch (err) {
-    console.error('❌ Ошибка при добавлении отзыва:', err);
+    console.error(' Ошибка при добавлении отзыва:', err);
     res.status(500).json({ error: 'Не удалось добавить отзыв' });
   }
 });
 
-/**
- * GET /api/reviews?film_id=1
- * Получить все отзывы к фильму
- */
 router.get('/', async (req, res) => {
   const { film_id } = req.query;
   let query = `
