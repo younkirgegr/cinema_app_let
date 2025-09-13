@@ -1,7 +1,15 @@
+// src/AppContent.jsx
 import { useState, useEffect } from 'react';
-import LoginForm from './components/auth/LoginForm';
+import LoginForm from './components/auth/LoginForm'; 
+import HallScheme from './components/tickets/HallScheme'; // Убедитесь, что путь правильный
 import { getFilms } from './services/api';
-import HallScheme from './components/tickets/HallScheme';
+import { useNavigate } from 'react-router-dom';
+import { Buffer } from 'buffer'; // Если используете Vite и Buffer не определен, установите пакет 'buffer'
+
+// Полифилл для Buffer в браузере, если нужно (для Vite)
+if (typeof window !== 'undefined' && !window.Buffer) {
+  window.Buffer = Buffer;
+}
 
 export default function AppContent() {
   const [user, setUser] = useState(null);
@@ -11,33 +19,63 @@ export default function AppContent() {
   const [selectedDay, setSelectedDay] = useState('today');
   const [showHallScheme, setShowHallScheme] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const navigate = useNavigate(); // Используем navigate для SPA-навигации
 
-  // Проверяем токен при загрузке
+  // --- АВТОРИЗАЦИЯ ---
+  // Проверяем токен при загрузке компонента
   useEffect(() => {
+    console.log("🔄 AppContent: Проверка наличия токена при загрузке..."); // Для отладки
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ first_name: payload.first_name || 'Пользователь', role_id: payload.role_id });
+        console.log("🔐 AppContent: Найден токен:", token); // Для отладки
+        // Попробуем декодировать токен (формат "userId.roleId" в Base64)
+        const decodedToken = atob(token); // Используем встроенную функцию браузера
+        console.log("🔓 AppContent: Декодированный токен:", decodedToken); // Для отладки
+        const [userId, roleId] = decodedToken.split('.').map(Number);
+        if (isNaN(userId) || isNaN(roleId)) {
+          throw new Error('Неверный формат данных в токене');
+        }
+        console.log("✅ AppContent: Токен валиден, userId:", userId, "roleId:", roleId); // Для отладки
+        // Устанавливаем пользователя с базовой информацией
+        // Имя можно запросить позже или передать в токене
+        setUser({
+          first_name: 'Пользователь',
+          user_id: userId,
+          role_id: roleId
+        });
       } catch (e) {
-        localStorage.removeItem('token');
+        console.error("❌ AppContent: Ошибка при чтении токена:", e); // Для отладки
+        localStorage.removeItem('token'); // Удаляем невалидный токен
+        // setUser(null); // Уже null по умолчанию
       }
-    }
-
-    const path = window.location.pathname;
-    if (path.startsWith('/tickets/')) {
-      const screeningId = path.split('/')[2];
-      if (screeningId) {
-        alert(`Вы выбрали сеанс №${screeningId}. Здесь будет выбор мест.`);
-        window.history.pushState({}, '', '/'); 
-      }
+    } else {
+       console.log("📭 AppContent: Токен не найден."); // Для отладки
     }
   }, []);
 
-  // Загружаем фильмы из API
+  const handleLoginSuccess = (userData) => {
+    console.log("🎉 AppContent: handleLoginSuccess вызван с данными:", userData); // Для отладки
+    setUser(userData); // Устанавливаем состояние пользователя
+    setShowLoginModal(false); // Закрываем модальное окно
+    console.log("🚪 AppContent: Модальное окно входа закрыто."); // Для отладки
+  };
+
+  const handleLogout = () => {
+    console.log("🚪 AppContent: Выход из системы..."); // Для отладки
+    localStorage.removeItem('token'); // Удаляем токен
+    setUser(null); // Сбрасываем состояние пользователя
+    console.log("✅ AppContent: Пользователь вышел."); // Для отладки
+  };
+
+
+  // --- ЗАГРУЗКА ФИЛЬМОВ ---
   useEffect(() => {
+    console.log("🎬 AppContent: Загрузка фильмов...");
     getFilms({ search })
       .then(data => {
+        console.log("📥 Получены фильмы:", data);
         if (Array.isArray(data)) {
           // Убираем дубликаты по film_id
           const uniqueFilms = Array.from(new Map(data.map(film => [film.film_id, film])).values());
@@ -48,13 +86,13 @@ export default function AppContent() {
         setLoading(false);
       })
       .catch(err => {
-        console.error('Ошибка загрузки фильмов:', err);
+        console.error('❌ Ошибка загрузки фильмов:', err);
         setFilms([]);
         setLoading(false);
       });
-  }, [search]);
+  }, [search]); // Перезапускается при изменении search
 
-  // Фиксированный список "Скоро в кино"
+  // --- ФИКСИРОВАННЫЙ СПИСОК "СКОРО В КИНО" ---
   const comingSoon = [
     {
       film_id: 102,
@@ -98,15 +136,25 @@ export default function AppContent() {
     }
   ];
 
-  // Обработчик клика на постер
+  // --- ОБРАБОТЧИК КЛИКА ПО ФИЛЬМУ ---
   const handleFilmClick = (film) => {
-    // Проверка: фильм уже в прокате?
-    const today = new Date();
-    const releaseDate = new Date(film.release_date);
-
-    // Если фильм ещё не вышел — всё равно открываем, но без кнопок покупки
+    console.log("🎬 Выбран фильм:", film.title);
     setSelectedFilm(film);
     setShowHallScheme(true);
+  };
+
+  // --- ОБРАБОТЧИК ВЫБОРА СЕАНСА ---
+  const handleSelectSession = (session) => {
+    console.log("📅 Выбран сеанс:", session.screening_id);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Пожалуйста, войдите в аккаунт');
+      // navigate('/login'); // Можно автоматически перенаправлять
+      return;
+    }
+    // Используем navigate для SPA-перехода
+    navigate(`/tickets/${session.screening_id}`);
+    setShowHallScheme(false); // Закрываем модальное окно
   };
 
   return (
@@ -156,26 +204,29 @@ export default function AppContent() {
                 fontSize: '16px'
               }}
             >
-              
+              🔍
             </button>
           </div>
           {user ? (
-            <button
-              onClick={() => window.location.href = '/my-tickets'}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Личный кабинет
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span>Привет, {user.first_name}!</span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Выйти
+              </button>
+            </div>
           ) : (
             <button
-              onClick={() => document.getElementById('login-modal').style.display = 'block'}
+              onClick={() => setShowLoginModal(true)} // Открываем модальное окно
               style={{
                 padding: '8px 16px',
                 backgroundColor: '#007bff',
@@ -231,7 +282,7 @@ export default function AppContent() {
         </button>
 
         <button
-          onClick={() => window.location.href = '/soon'}
+          onClick={() => navigate('/soon')} // SPA-переход
           style={{
             padding: '10px 20px',
             backgroundColor: '#28a745',
@@ -245,18 +296,18 @@ export default function AppContent() {
         </button>
 
         <button
-            onClick={() => window.location.href = '/schedule'}
-            style={{
-                padding: '10px 20px',
-                backgroundColor: '#ffc107',
-                color: 'black',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-        }}
+          onClick={() => navigate('/schedule')} // SPA-переход
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#ffc107',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
         >
-            Расписание
-            </button>
+          Расписание
+        </button>
       </div>
 
       {/* ОСНОВНАЯ АФИША */}
@@ -322,7 +373,7 @@ export default function AppContent() {
           {comingSoon.map(film => (
             <div
               key={film.film_id}
-              onClick={() => handleFilmClick(film)}
+              onClick={() => handleFilmClick(film)} // Используем тот же обработчик
               style={{
                 width: '300px',
                 border: '1px solid #ddd',
@@ -368,57 +419,53 @@ export default function AppContent() {
       </footer>
 
       {/* Модальное окно входа */}
-      <div id="login-modal" style={{
-        display: 'none',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000
-      }}>
+      {showLoginModal && (
         <div style={{
-          backgroundColor: 'white',
-          padding: '30px',
-          borderRadius: '8px',
-          width: '300px'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
         }}>
-          <button
-            onClick={() => document.getElementById('login-modal').style.display = 'none'}
-            style={{
-              float: 'right',
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
-              cursor: 'pointer'
-            }}
-          >
-            ×
-          </button>
-          <LoginForm onLogin={setUser} />
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '8px',
+            width: '300px',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowLoginModal(false)} // Закрываем модальное окно
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer'
+              }}
+            >
+              &times;
+            </button>
+            {/* Передаем handleLoginSuccess как onLoginSuccess */}
+            <LoginForm onLogin={setUser} />
+            </div>
         </div>
-      </div>
+      )}
 
-      {/* Всплывающее окно выбора сеанса */}
+      {/* Модальное окно выбора сеанса */}
       {showHallScheme && selectedFilm && (
         <HallScheme
           film={selectedFilm}
           selectedDay={selectedDay}
           onClose={() => setShowHallScheme(false)}
-          onSelectSession={(session) => {
-            // Проверка авторизации
-            const token = localStorage.getItem('token');
-            if (!token) {
-              alert('Пожалуйста, войдите в аккаунт');
-              return;
-            }
-
-            // Используем navigate для SPA-перехода
-            window.location.href = `/tickets/${session.screening_id}`;
-          }}
+          onSelectSession={handleSelectSession} // Передаем обработчик выбора
         />
       )}
     </div>

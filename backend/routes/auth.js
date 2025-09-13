@@ -1,13 +1,14 @@
+// backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt'); // ← добавь импорт
 const sequelize = require('../config/database');
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Ищем пользователя по email
     const [users] = await sequelize.query(`
       SELECT user_id, first_name, email, password_hash, role_id
       FROM users
@@ -20,12 +21,16 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
-    // Простая проверка пароля (для теста)
-    if (user.password_hash !== password) {
+    // ❌ БЫЛО: if (user.password_hash !== password)
+    // ✅ СТАЛО: проверка через bcrypt
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    if (!isMatch) {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
 
-    const token = Buffer.from(`${user.user_id}.${user.role_id}`).toString('base64');
+    // Генерация токена: userId.role_id
+    const token = `${user.user_id}.${user.role_id}`;
 
     res.json({
       token,
@@ -35,8 +40,8 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Ошибка при входе' });
+    console.error('Ошибка при входе:', err);
+    res.status(500).json({ error: 'Ошибка сервера при входе' });
   }
 });
 

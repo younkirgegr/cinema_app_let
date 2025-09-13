@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
 
+
 router.get('/', async (req, res) => {
   const { search, genre } = req.query;
-
   let query = `
     SELECT 
       f.film_id,
@@ -18,14 +18,12 @@ router.get('/', async (req, res) => {
     LEFT JOIN reviews r ON f.film_id = r.film_id
     WHERE 1=1
   `;
-
   const replacements = [];
 
   if (search) {
     query += ` AND f.title LIKE ?`;
     replacements.push(`%${search}%`);
   }
-
   if (genre) {
     query += ` AND f.genre_id = ?`;
     replacements.push(genre);
@@ -35,13 +33,13 @@ router.get('/', async (req, res) => {
 
   try {
     const [films] = await sequelize.query(query, { replacements });
-    res.json(films);
+    console.log('Найдено фильмов:', films.length);
+    res.json(films); // ← Возвращаем JSON
   } catch (err) {
-    console.error(err);
+    console.error('Ошибка при получении фильмов:', err);
     res.status(500).json({ error: 'Ошибка при получении фильмов' });
   }
 });
-
 
 router.post('/', async (req, res) => {
   const { title, genre_id, duration_min, rating } = req.body;
@@ -117,15 +115,32 @@ router.get('/:filmId', async (req, res) => {
   }
 });
 
-
+// backend/routes/films.js
 router.get('/with-screenings', async (req, res) => {
   const { day } = req.query;
 
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    const now = new Date();
+    let startDate, endDate;
 
-    const dateFilter = day === 'today' ? today : day === 'tomorrow' ? tomorrow : null;
+    if (day === 'tomorrow') {
+      // Завтра: начало завтрашнего дня
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() + 1);
+      startDate.setHours(0, 0, 0, 0);
+
+      // Конец завтрашнего дня
+      endDate = new Date(startDate);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Сегодня: начало сегодняшнего дня
+      startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+
+      // Конец сегодняшнего дня
+      endDate = new Date(now);
+      endDate.setHours(23, 59, 59, 999);
+    }
 
     const [films] = await sequelize.query(`
       SELECT 
@@ -135,7 +150,6 @@ router.get('/with-screenings', async (req, res) => {
         f.duration_min,
         f.avg_rating,
         f.poster_url,
-        f.description,
         s.screening_id,
         s.start_time,
         s.base_price,
@@ -143,10 +157,13 @@ router.get('/with-screenings', async (req, res) => {
       FROM films f
       JOIN screenings s ON f.film_id = s.film_id
       JOIN halls h ON s.hall_id = h.hall_id
-      WHERE s.start_time >= NOW()
-        AND DATE(s.start_time) = ?
+      WHERE s.is_active = TRUE
+        AND s.start_time >= ?
+        AND s.start_time <= ?
       ORDER BY s.start_time
-    `, { replacements: [dateFilter] });
+    `, {
+      replacements: [startDate, endDate]
+    });
 
     // Группируем по фильму
     const grouped = {};
@@ -159,7 +176,6 @@ router.get('/with-screenings', async (req, res) => {
           duration_min: row.duration_min,
           avg_rating: row.avg_rating,
           poster_url: row.poster_url,
-          description: row.description,
           screenings: []
         };
       }
@@ -171,10 +187,9 @@ router.get('/with-screenings', async (req, res) => {
       });
     });
 
-    const result = Object.values(grouped);
-    res.json(result);
+    res.json(Object.values(grouped));
   } catch (err) {
-    console.error(err);
+    console.error('Ошибка в /with-screenings:', err);
     res.status(500).json({ error: 'Ошибка при получении расписания' });
   }
 });

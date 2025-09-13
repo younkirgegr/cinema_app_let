@@ -1,46 +1,55 @@
+// src/pages/SchedulePage.jsx
 import { useState, useEffect } from 'react';
-import { getFilmsWithScreenings } from '../services/api';
+import { getSchedule } from '../services/api';
 
 export default function SchedulePage() {
   const [films, setFilms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedDay, setSelectedDay] = useState('today');
 
-  // Загружаем фильмы с сеансами
   useEffect(() => {
-    getFilmsWithScreenings(selectedDay)
+    console.log(`[SchedulePage] Загрузка расписания для ${selectedDay}...`);
+    setLoading(true);
+    setError('');
+
+    getSchedule(selectedDay)
       .then(data => {
+        console.log(`[SchedulePage] Получено ${data.length} фильмов`);
         if (Array.isArray(data)) {
-          // Сортируем по времени начала сеанса
-          data.sort((a, b) => {
-            const timeA = a.screenings[0]?.start_time || '';
-            const timeB = b.screenings[0]?.start_time || '';
+          // Сортируем фильмы по времени первого сеанса
+          const sortedData = [...data].sort((a, b) => {
+            const timeA = a.screenings[0]?.start_time || '9999-12-31';
+            const timeB = b.screenings[0]?.start_time || '9999-12-31';
             return timeA.localeCompare(timeB);
           });
-          setFilms(data);
+          setFilms(sortedData);
+        } else {
+          setFilms([]);
         }
       })
       .catch(err => {
-        console.error('Ошибка загрузки расписания:', err);
+        console.error('[SchedulePage] Ошибка загрузки:', err);
+        setError('Не удалось загрузить расписание. Попробуйте позже.');
+        setFilms([]);
       })
       .finally(() => {
         setLoading(false);
       });
   }, [selectedDay]);
 
-  // Фильтрация по дате
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const formatDate = (dateString) => {
+    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+    return new Date(dateString).toLocaleDateString('ru-RU', options);
+  };
 
-  const filteredFilms = films.filter(film => {
-    return film.screenings.some(session => {
-      const sessionDate = session.start_time.split(' ')[0];
-      return (selectedDay === 'today' && sessionDate === today) ||
-             (selectedDay === 'tomorrow' && sessionDate === tomorrow);
-    });
-  });
+  const formatTime = (dateString) => {
+    return new Date(dateString).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  };
 
-  if (loading) return <p>Загрузка расписания...</p>;
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   return (
     <div style={{
@@ -60,10 +69,8 @@ export default function SchedulePage() {
         paddingBottom: '10px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Логотип" style={{ width: '60px', height: '60px' }} />
-          <h1 style={{ margin: '0', fontSize: '28px', color: '#333' }}>КиноМир</h1>
+          <h1 style={{ margin: '0', fontSize: '28px', color: '#333' }}>📅 Расписание</h1>
         </div>
-
         <button
           onClick={() => window.location.href = '/'}
           style={{
@@ -75,32 +82,11 @@ export default function SchedulePage() {
             cursor: 'pointer'
           }}
         >
-          На главную
+          ← На главную
         </button>
       </header>
 
-      {/* Баннер */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: '400px',
-        overflow: 'hidden',
-        borderRadius: '12px',
-        marginBottom: '30px'
-      }}>
-        <img
-          src="/posters/banner.jpg"
-          alt="Баннер"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '12px'
-          }}
-        />
-      </div>
-
-      {/* Кнопки выбора дня */}
+      {/* Выбор дня */}
       <div style={{
         display: 'flex',
         gap: '10px',
@@ -108,8 +94,9 @@ export default function SchedulePage() {
         justifyContent: 'center'
       }}>
         <button
+          onClick={() => setSelectedDay('today')}
           style={{
-            padding: '8px 16px',
+            padding: '10px 20px',
             backgroundColor: selectedDay === 'today' ? '#007bff' : '#fff',
             color: selectedDay === 'today' ? 'white' : '#333',
             border: '1px solid #007bff',
@@ -117,13 +104,13 @@ export default function SchedulePage() {
             cursor: 'pointer',
             fontWeight: 'bold'
           }}
-          onClick={() => setSelectedDay('today')}
         >
-          Сегодня
+          Сегодня ({formatDate(today)})
         </button>
         <button
+          onClick={() => setSelectedDay('tomorrow')}
           style={{
-            padding: '8px 16px',
+            padding: '10px 20px',
             backgroundColor: selectedDay === 'tomorrow' ? '#007bff' : '#fff',
             color: selectedDay === 'tomorrow' ? 'white' : '#333',
             border: '1px solid #007bff',
@@ -131,54 +118,81 @@ export default function SchedulePage() {
             cursor: 'pointer',
             fontWeight: 'bold'
           }}
-          onClick={() => setSelectedDay('tomorrow')}
         >
-          Завтра
+          Завтра ({formatDate(tomorrow)})
         </button>
       </div>
 
-      {/* Расписание */}
-      <h2 style={{ marginBottom: '20px' }}>📅 Расписание</h2>
+      {/* Загрузка / Ошибка */}
+      {loading && <p style={{ textAlign: 'center' }}>Загрузка расписания...</p>}
+      {error && <p style={{ textAlign: 'center', color: 'red' }}>{error}</p>}
 
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '20px',
-        justifyContent: 'center'
-      }}>
-        {filteredFilms.length === 0 ? (
-          <p>На выбранный день нет сеансов</p>
-        ) : (
-          filteredFilms.map(film => (
-            <div key={film.film_id} style={{
-              width: '300px',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              backgroundColor: '#fff',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}>
-              <img
-                src={`/posters/${film.film_id}.jpg`}
-                alt={film.title}
-                style={{
-                  width: '100%',
-                  height: '200px',
-                  objectFit: 'cover'
-                }}
-              />
-              <div style={{ padding: '16px' }}>
-                <h3>{film.title}</h3>
-                <p><strong>Жанр:</strong> {film.genre_name}</p>
-                <p><strong>Длительность:</strong> {film.duration_min} мин</p>
-                <p><strong>Рейтинг:</strong> ⭐ {film.avg_rating ? film.avg_rating.toFixed(1) : 'Нет'}</p>
-                <p><strong>Описание:</strong></p>
-                <p style={{ color: '#555', lineHeight: '1.6' }}>{film.description}</p>
+      {/* Расписание */}
+      {!loading && !error && (
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '20px',
+          justifyContent: 'center'
+        }}>
+          {films.length === 0 ? (
+            <p style={{ textAlign: 'center', width: '100%' }}>
+              На {selectedDay === 'today' ? 'сегодня' : 'завтра'} сеансов нет
+            </p>
+          ) : (
+            films.map(film => (
+              <div key={film.film_id} style={{
+                width: '300px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                backgroundColor: '#fff',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                <img
+                  src={film.poster_url || `/posters/${film.film_id}.jpg`}
+                  alt={film.title}
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'cover'
+                  }}
+                />
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ margin: '0 0 10px 0' }}>{film.title}</h3>
+                  <p style={{ margin: '5px 0' }}><strong>Жанр:</strong> {film.genre_name}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Длительность:</strong> {film.duration_min} мин</p>
+                  
+                  <h4 style={{ margin: '15px 0 10px 0' }}>Сеансы:</h4>
+                  {film.screenings && film.screenings.length > 0 ? (
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      justifyContent: 'flex-start'
+                    }}>
+                      {film.screenings.map((session, idx) => (
+                        <div key={idx} style={{
+                          padding: '6px 10px',
+                          backgroundColor: '#e9ecef',
+                          borderRadius: '4px',
+                          fontSize: '14px'
+                        }}>
+                          <div><strong>{formatTime(session.start_time)}</strong></div>
+                          <div>{session.hall_name}</div>
+                          <div>{session.base_price} ₽</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>Нет сеансов</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Футер */}
       <footer style={{
@@ -187,7 +201,7 @@ export default function SchedulePage() {
         borderTop: '1px solid #ddd',
         color: '#666',
         fontSize: '14px',
-        marginTop: '50px'
+        marginTop: '40px'
       }}>
         <p>&copy; 2025 КиноМир. Все права защищены.</p>
       </footer>

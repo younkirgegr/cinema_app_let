@@ -7,8 +7,8 @@ const sequelize = require('./config/database');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(express.json()); 
 app.use(cors());
-app.use(express.json());
 
 // Подключаем роуты
 const filmRoutes = require('./routes/films');
@@ -18,6 +18,8 @@ const ticketsRoutes = require('./routes/tickets');
 const adminRoutes = require('./routes/admin');
 const myTicketsRoutes = require('./routes/my-tickets');
 const reviewsRoutes = require('./routes/reviews');
+const hallsRoutes = require('./routes/halls');
+const scheduleRoutes = require('./routes/schedule');
 
 // Подключаем маршруты к API
 app.use('/api/films', filmRoutes);
@@ -27,7 +29,8 @@ app.use('/api/tickets', ticketsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/my-tickets', myTicketsRoutes);
-
+app.use('/api/halls', hallsRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 
 sequelize.authenticate()

@@ -5,23 +5,23 @@ const  sequelize  = require('../config/database');
 
 router.get('/film/:filmId', async (req, res) => {
   const { filmId } = req.params;
-
   try {
     const [screenings] = await sequelize.query(`
       SELECT 
         s.screening_id,
         s.start_time,
         s.base_price,
-        s.hall_id
+        h.hall_name
       FROM screenings s
-      WHERE s.film_id = ?
+      JOIN halls h ON s.hall_id = h.hall_id
+      WHERE s.film_id = ? AND s.is_active = TRUE
       ORDER BY s.start_time
     `, { replacements: [filmId] });
 
-    console.log('Найдено сеансов:', screenings.length); 
+    console.log(`Найдено сеансов для фильма ${filmId}:`, screenings.length);
     res.json(screenings);
   } catch (err) {
-    console.error(' Ошибка в /film/:filmId:', err); 
+    console.error('Ошибка получения сеансов:', err);
     res.status(500).json({ error: 'Ошибка при получении сеансов' });
   }
 });

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
+const authMiddleware = require('../middleware/auth');
 
 
-router.post('/sell', async (req, res) => {
+router.post('/sell', authMiddleware, async (req, res) => {
   const { screening_id, seat_id, user_id } = req.body;
 
   try {
@@ -61,42 +62,47 @@ router.post('/sell', async (req, res) => {
 });
 
 
-router.get('/my', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Требуется авторизация' });
+router.get('/my', authMiddleware, async (req, res) => {
+  // Убедимся, что req.user существует
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ error: 'Неавторизованный пользователь' });
   }
 
+  const userId = req.user.userId;
+
   try {
-    const token = authHeader.split(' ')[1];
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-    const user_id = payload.user_id;
+    console.log('Получение билетов для user_id:', userId);
 
-    if (!user_id) {
-      return res.status(401).json({ error: 'Неверный токен' });
-    }
-
+    // SQL-запрос: получаем билеты с информацией о фильме, зале и времени
     const [tickets] = await sequelize.query(`
-      SELECT 
+      SELECT
         t.ticket_id,
-        f.title,
-        h.hall_name,
-        s.start_time,
-        t.seat_id,
+        t.row_num,
+        t.seat_num,
         t.price,
-        t.created_at
+        f.title,
+        f.poster_url,
+        h.hall_name,
+        s.start_time
       FROM tickets t
       JOIN screenings s ON t.screening_id = s.screening_id
       JOIN films f ON s.film_id = f.film_id
       JOIN halls h ON s.hall_id = h.hall_id
       WHERE t.user_id = ?
-      ORDER BY t.created_at DESC
-    `, { replacements: [user_id] });
+      ORDER BY s.start_time DESC
+    `, {
+      replacements: [userId]
+    });
 
+    console.log(`Найдено билетов: ${tickets.length}`);
+
+    // Отправляем билеты клиенту
     res.json(tickets);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Ошибка при получении билетов' });
+    console.error('Ошибка при получении билетов:', err);
+    res.status(500).json({
+      error: 'Не удалось загрузить ваши билеты. Попробуйте позже.'
+    });
   }
 });
 
