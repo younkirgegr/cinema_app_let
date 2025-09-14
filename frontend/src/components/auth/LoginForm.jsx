@@ -1,6 +1,8 @@
 // src/components/auth/LoginForm.jsx
+
 import { useState } from 'react';
 import { login } from '../../services/api'; // Убедитесь, что путь правильный
+
 
 export default function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -14,7 +16,7 @@ export default function LoginForm({ onLogin }) {
     setIsLoading(true);
 
     try {
-      console.log('📤 LoginForm: Отправка данных для входа...');
+      console.log(' LoginForm: Отправка данных для входа...');
       // 1. Вызываем функцию API для входа
       const data = await login(email, password);
       console.log('📥 LoginForm: Получен ответ от API:', data);
@@ -31,26 +33,26 @@ export default function LoginForm({ onLogin }) {
       }
 
       // 4. Проверяем, есть ли токен в ответе
-      if (!data.token) {
-        console.error('❌ LoginForm: Ответ от API не содержит token:', data);
+      if (!data.user.token){
+        console.error(' LoginForm: Ответ от API не содержит token:', data);
         throw new Error('Ответ сервера не содержит токен. Обратитесь к администратору.');
       }
 
       // 5. Если токен есть, сохраняем его в localStorage
-      console.log('💾 LoginForm: Сохранение токена в localStorage...');
-      localStorage.setItem('token', data.token);
-      console.log('✅ LoginForm: Токен успешно сохранён.');
+      console.log('LoginForm: Сохранение токена в localStorage...');
+      localStorage.setItem('token', data.user.token);
+      console.log('LoginForm: Токен успешно сохранён.');
 
       // 6. Вызываем функцию onLogin, переданную из AppContent, 
       //    чтобы обновить состояние пользователя в основном приложении.
       //    Передаём данные пользователя из ответа или заглушку.
       const userData = data.user || { first_name: "Пользователь" };
-      console.log('🎉 LoginForm: Вызов onLogin с данными пользователя:', userData);
+      console.log('LoginForm: Вызов onLogin с данными пользователя:', userData);
       onLogin(userData);
 
     } catch (err) {
       // 7. Обрабатываем любые ошибки (сетевые, от сервера, логические)
-      console.error('❌ LoginForm: Ошибка при входе:', err);
+      console.error('LoginForm: Ошибка при входе:', err);
       // Отображаем пользователю понятное сообщение
       setError(err.message || 'Ошибка подключения к серверу. Попробуйте позже.');
     } finally {

@@ -1,7 +1,7 @@
 // src/pages/AdminPage.jsx
 import { useState, useEffect } from 'react';
-import { getFilms, getHalls, addFilm, createScreening } from '../services/api';
-
+import { getFilms, getHalls, addFilm, deleteFilm,updateFilm, createScreening } from '../services/api';
+import FilmForm from "../components/admin/FilmForm"
 export default function AdminPage() {
   const [films, setFilms] = useState([]);
   const [halls, setHalls] = useState([]);
@@ -24,8 +24,16 @@ export default function AdminPage() {
     loadAdminData();
   }, []);
 
-  // Форма добавления фильма
+  // Форма добавления и редактирования фильма
   const [showAddFilmForm, setShowAddFilmForm] = useState(false);
+  const [showRedactFilmForm, setShowRedactFilmForm] = useState(false);
+  const [editedFilm, setEditedFilm] = useState({
+    title: '',
+    genre_id: '',
+    duration_min: '',
+    rating: '',
+    description: ''
+  });
   const [newFilm, setNewFilm] = useState({
     title: '',
     genre_id: '',
@@ -45,6 +53,41 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteFilm = async (film_id) =>{
+    try {
+      await deleteFilm(film_id)
+      setFilms(films.filter((film)=>film.film_id!=film_id))
+    }
+    catch (err){
+      alert("Ошибка при удалении фильма")
+      console.error(err)
+    }
+  }
+
+  const handleEditFilm = async () => {
+    try {
+      // 1. Отправляем запрос и ждем ответа
+      await updateFilm(editedFilm);
+
+      // 2. Обновляем массив фильмов в состоянии
+      setFilms(currentFilms =>
+        currentFilms.map(f => {
+          if (f.film_id === editedFilm.film_id) {
+            return editedFilm; // Заменяем старый фильм на обновленный
+          }
+          return f;
+        })
+      );
+
+      // 3. Закрываем модальное окно
+      setShowRedactFilmForm(false);
+      
+      alert("Фильм успешно обновлен!");
+
+    } catch (err) {
+      alert(`Ошибка при обновлении фильма: ${err.message}`);
+    }
+};
   // Форма создания сеанса
   const [showCreateSessionForm, setShowCreateSessionForm] = useState(false);
   const [sessionData, setSessionData] = useState({
@@ -113,8 +156,11 @@ export default function AdminPage() {
               <li key={f.film_id} style={listItem}>
                 {f.title} ({f.duration_min} мин)
                 <div>
-                  <button style={{ ...btnSmall, marginRight: '5px' }}>✏️ Редактировать</button>
-                  <button style={{ ...btnSmall, backgroundColor: '#dc3545' }}>🗑 Удалить</button>
+                  <button style={{ ...btnSmall, marginRight: '5px' }} onClick={()=>{
+                    setEditedFilm(f);
+                    setShowRedactFilmForm(true);
+                    }}>✏️ Редактировать</button>
+                  <button style={{ ...btnSmall, backgroundColor: '#dc3545' }} onClick={()=>handleDeleteFilm(f.film_id)}>🗑 Удалить</button>
                 </div>
               </li>
             ))}
@@ -123,7 +169,7 @@ export default function AdminPage() {
 
         {/* Управление сеансами */}
         <div style={cardStyle}>
-          <h2>📅 Сеансы</h2>
+          <h2> Сеансы</h2>
           <button
             onClick={() => setShowCreateSessionForm(true)}
             style={btnPrimary}
@@ -170,7 +216,7 @@ export default function AdminPage() {
               required
             />
             <button type="submit" onClick={handleCreateSession} style={btnSuccess}>
-              ✅ Создать сеанс
+               Создать сеанс
             </button>
           </form>
         </div>
@@ -196,72 +242,32 @@ export default function AdminPage() {
             borderRadius: '12px',
             width: '600px'
           }}>
-            <h2>➕ Добавить фильм</h2>
-            <form onSubmit={(e) => { e.preventDefault(); handleAddFilm(); }}>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Название:</label>
-                <input
-                  name="title"
-                  value={newFilm.title}
-                  onChange={(e) => setNewFilm({ ...newFilm, title: e.target.value })}
-                  required
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Жанр:</label>
-                <select
-                  name="genre_id"
-                  value={newFilm.genre_id}
-                  onChange={(e) => setNewFilm({ ...newFilm, genre_id: e.target.value })}
-                  required
-                  style={inputStyle}
-                >
-                  <option value="">Выберите жанр</option>
-                  <option value="1">Боевик</option>
-                  <option value="2">Комедия</option>
-                  <option value="3">Драма</option>
-                  <option value="4">Фантастика</option>
-                  <option value="5">Ужасы</option>
-                  <option value="6">Мультфильм</option>
-                </select>
-              </div>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Продолжительность (мин):</label>
-                <input
-                  type="number"
-                  name="duration_min"
-                  value={newFilm.duration_min}
-                  onChange={(e) => setNewFilm({ ...newFilm, duration_min: e.target.value })}
-                  required
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Рейтинг:</label>
-                <input
-                  name="rating"
-                  value={newFilm.rating}
-                  onChange={(e) => setNewFilm({ ...newFilm, rating: e.target.value })}
-                  required
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ marginBottom: '15px' }}>
-                <label>Описание:</label>
-                <textarea
-                  name="description"
-                  value={newFilm.description}
-                  onChange={(e) => setNewFilm({ ...newFilm, description: e.target.value })}
-                  rows="4"
-                  style={inputStyle}
-                ></textarea>
-              </div>
-              <button type="submit" style={btnSuccess}>Создать фильм</button>
-              <button type="button" onClick={() => setShowAddFilmForm(false)} style={{ marginLeft: '10px' }}>
-                Отмена
-              </button>
-            </form>
+            <h2> Добавить фильм</h2>
+            <FilmForm onSubmit={(e) => { e.preventDefault(); handleAddFilm(); }} onClose={() => setShowAddFilmForm(false)} setNewFilm={setNewFilm} newFilm={newFilm}/>
+          </div>
+        </div>
+      )}
+      {showRedactFilmForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '12px',
+            width: '600px'
+          }}>
+            <h2> Редактировать фильм</h2>
+            <FilmForm onSubmit={(e) => { e.preventDefault(); handleEditFilm(); }} onClose={() => setShowRedactFilmForm(false)} setNewFilm={setEditedFilm} newFilm={editedFilm}/>
           </div>
         </div>
       )}

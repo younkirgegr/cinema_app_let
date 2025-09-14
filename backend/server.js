@@ -20,6 +20,7 @@ const myTicketsRoutes = require('./routes/my-tickets');
 const reviewsRoutes = require('./routes/reviews');
 const hallsRoutes = require('./routes/halls');
 const scheduleRoutes = require('./routes/schedule');
+const userRoutes = require('./routes/users');
 
 // Подключаем маршруты к API
 app.use('/api/films', filmRoutes);
@@ -31,6 +32,7 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/my-tickets', myTicketsRoutes);
 app.use('/api/halls', hallsRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/users',userRoutes);
 
 
 sequelize.authenticate()

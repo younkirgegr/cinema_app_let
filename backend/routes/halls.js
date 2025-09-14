@@ -1,7 +1,7 @@
 // backend/routes/halls.js
 const express = require('express');
 const router = express.Router();
-const { sequelize } = require('../config/database');
+const sequelize = require('../config/database');
 
 
 router.get('/', async (req, res) => {
@@ -10,8 +10,7 @@ router.get('/', async (req, res) => {
       SELECT 
         hall_id,
         hall_name,
-        capacity,
-        screen_type
+        capacity
       FROM halls
       ORDER BY hall_name
     `);

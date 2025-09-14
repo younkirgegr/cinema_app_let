@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
-const { sequelize } = require('../config/database');
+const sequelize = require('../config/database');
 
 router.get('/', authMiddleware, async (req, res) => {
   const userId = req.user.userId;
@@ -11,8 +11,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const [tickets] = await sequelize.query(`
       SELECT 
         t.ticket_id,
-        t.row_num,
-        t.seat_num,
+        t.seat_id AS seat_num,
         t.price,
         f.title,
         f.poster_url,

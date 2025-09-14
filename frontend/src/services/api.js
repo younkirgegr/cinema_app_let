@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 
 
@@ -118,19 +118,41 @@ export const addFilm = (data) => {
   }).then(res => res.json());
 };
 
-export const updateFilm = (filmId, data) => {
-  return fetch(`${API_BASE}/films/${filmId}`, {
-    method: 'PUT',
+export const updateFilm = (data) => {
+  return fetch(`${API_BASE}/films/${data.film_id}`, {
+    method: 'PATCH',
     headers: getHeaders(),
     body: JSON.stringify(data)
   }).then(res => res.json());
 };
 
-export const deleteFilm = (filmId) => {
-  return fetch(`${API_BASE}/films/${filmId}`, {
+export const deleteFilm = async (filmId) => {
+  const response = await fetch(`${API_BASE}/films/${filmId}`, {
     method: 'DELETE',
     headers: getHeaders()
-  }).then(res => res.json());
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Ошибка: ${response.status} ${response.statusText}`;
+    
+    try {
+      const errorBody = await response.json();
+      if (errorBody && errorBody.message) {
+        errorMessage = errorBody.message;
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.indexOf("application/json") !== -1) {
+    return response.json();
+  } else {
+    return {}; 
+  }
 };
 
 export const getFilmById = (filmId) => {
@@ -173,4 +195,10 @@ export const getSchedule = (day) => {
     }
     return res.json();
   });
+};
+
+export const getUserInformation = () => {
+  return fetch(`${API_BASE}/users/me`, {
+    headers: getHeaders()
+  }).then(res => res.json());
 };

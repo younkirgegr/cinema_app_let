@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
+const authMiddleware = require("../middleware/auth")
+const checkRole = require("../middleware/role")
+const { QueryTypes } = require('sequelize')
 
 
 router.get('/', async (req, res) => {
@@ -114,6 +117,85 @@ router.get('/:filmId', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении фильма' });
   }
 });
+
+router.delete("/:filmId", authMiddleware, checkRole(['Администратор']), async (req, res) => {
+  const { filmId } = req.params;
+
+  try {
+    console.log(`Attempting to DELETE film with film_id: ${filmId}`);
+    
+    const [results] = await sequelize.query(
+      `DELETE FROM films WHERE film_id = ?`, 
+      { 
+        replacements: [filmId],
+        type: QueryTypes.DELETE 
+      }
+    );
+
+    const affectedRows = results?.affectedRows ?? results?.rowCount ?? 0;
+    console.log("Affected rows:", affectedRows);
+    
+    if (affectedRows === 0) {
+      return res.status(404).send({ message: "Фильм с таким ID для удаления не найден" });
+    }
+
+    return res.status(200).send({ message: "Фильм успешно удален" });
+
+  } catch (error) {
+    console.error("!!! ОШИБКА ПРИ УДАЛЕНИИ ФИЛЬМА:", error);
+    return res.status(500).send({ message: "Ошибка на сервере при удалении фильма" });
+  }
+});
+
+router.patch("/:filmId", authMiddleware, checkRole(["Администратор"]), async (req, res) => {
+  const { filmId } = req.params;
+  const body = req.body;
+
+  // Оборачиваем ВСЁ в try...catch
+  try { 
+    const allowedFields = ['title', 'genre_id', 'duration_min', 'rating', 'description', 'release_date', 'poster_url', 'end_date'];
+    const setClauses = [];
+    const values = [];
+
+    Object.keys(body).forEach(key => {
+      if (allowedFields.includes(key) && body[key] !== undefined) {
+        setClauses.push(`${key} = ?`);
+        values.push(body[key]);
+      }
+    });
+
+    if (setClauses.length === 0) {
+      return res.status(400).json({ message: "Нет полей для обновления" });
+    }
+
+    values.push(filmId);
+
+    const sql = `UPDATE films SET ${setClauses.join(', ')} WHERE film_id = ?`;
+
+    console.log("Executing SQL:", sql);
+    console.log("With values:", values);
+    
+    const [results] = await sequelize.query(sql, {
+      replacements: values,
+      type: QueryTypes.UPDATE
+    });
+    
+    const affectedRows = results?.affectedRows
+
+    console.log("Affected rows:", affectedRows);
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Фильм не найден или данные не изменились" });
+    }
+
+    res.status(200).json({ message: "Фильм успешно обновлен" });
+
+  } catch (error) {
+    console.error("!!! ОШИБКА ПРИ ОБНОВЛЕНИИ ФИЛЬМА:", error);
+    res.status(500).json({ message: "Внутренняя ошибка сервера", error: error.message });
+  }
+});
+
 
 // backend/routes/films.js
 router.get('/with-screenings', async (req, res) => {

@@ -1,4 +1,4 @@
-// backend/routes/auth.js
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt'); // ← добавь импорт
@@ -21,22 +21,24 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
-    // ❌ БЫЛО: if (user.password_hash !== password)
-    // ✅ СТАЛО: проверка через bcrypt
     const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!isMatch) {
       return res.status(401).json({ error: 'Неверный email или пароль' });
     }
 
-    // Генерация токена: userId.role_id
-    const token = `${user.user_id}.${user.role_id}`;
+    const token = jwt.sign({
+    user_id:user.user_id,
+    role_id:user.role_id,
+    },
+    "VERY_HARD_SECRET_KEY",
+    {expiresIn: '12h'})
 
     res.json({
-      token,
-      user: {
-        first_name: user.first_name,
-        role_id: user.role_id
+    user:{
+        token:token,
+        first_name:user.first_name,
+          role_id:user.role_id
       }
     });
   } catch (err) {

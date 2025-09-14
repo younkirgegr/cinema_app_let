@@ -1,12 +1,11 @@
-// src/AppContent.jsx
 import { useState, useEffect } from 'react';
 import LoginForm from './components/auth/LoginForm'; 
-import HallScheme from './components/tickets/HallScheme'; // Убедитесь, что путь правильный
+import HallScheme from './components/tickets/HallScheme'; 
 import { getFilms } from './services/api';
 import { useNavigate } from 'react-router-dom';
-import { Buffer } from 'buffer'; // Если используете Vite и Buffer не определен, установите пакет 'buffer'
+import { Buffer } from 'buffer';
+import { redirect } from 'react-router-dom';
 
-// Полифилл для Buffer в браузере, если нужно (для Vite)
 if (typeof window !== 'undefined' && !window.Buffer) {
   window.Buffer = Buffer;
 }
@@ -20,38 +19,16 @@ export default function AppContent() {
   const [showHallScheme, setShowHallScheme] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const navigate = useNavigate(); // Используем navigate для SPA-навигации
+  const navigate = useNavigate();
 
-  // --- АВТОРИЗАЦИЯ ---
+  // --- АВТОРИЗАЦИ ---
   // Проверяем токен при загрузке компонента
   useEffect(() => {
-    console.log("🔄 AppContent: Проверка наличия токена при загрузке..."); // Для отладки
+    console.log(" AppContent: Проверка наличия токена при загрузке..."); 
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        console.log("🔐 AppContent: Найден токен:", token); // Для отладки
-        // Попробуем декодировать токен (формат "userId.roleId" в Base64)
-        const decodedToken = atob(token); // Используем встроенную функцию браузера
-        console.log("🔓 AppContent: Декодированный токен:", decodedToken); // Для отладки
-        const [userId, roleId] = decodedToken.split('.').map(Number);
-        if (isNaN(userId) || isNaN(roleId)) {
-          throw new Error('Неверный формат данных в токене');
-        }
-        console.log("✅ AppContent: Токен валиден, userId:", userId, "roleId:", roleId); // Для отладки
-        // Устанавливаем пользователя с базовой информацией
-        // Имя можно запросить позже или передать в токене
-        setUser({
-          first_name: 'Пользователь',
-          user_id: userId,
-          role_id: roleId
-        });
-      } catch (e) {
-        console.error("❌ AppContent: Ошибка при чтении токена:", e); // Для отладки
-        localStorage.removeItem('token'); // Удаляем невалидный токен
-        // setUser(null); // Уже null по умолчанию
-      }
-    } else {
-       console.log("📭 AppContent: Токен не найден."); // Для отладки
+    if (!token) {
+        console.log("📭 AppContent: Токен не найден."); // Для отладки
+        redirect("/login")
     }
   }, []);
 

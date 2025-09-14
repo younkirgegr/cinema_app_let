@@ -4,7 +4,6 @@ import SelectSeatsPage from './pages/SelectSeatsPage';
 import SoonInCinemaPage from './pages/SoonInCinemaPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import SchedulePage from './pages/SchedulePage'; 
-//import LoginForm from './components/auth/LoginForm';
 import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 

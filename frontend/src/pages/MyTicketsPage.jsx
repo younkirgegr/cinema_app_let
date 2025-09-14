@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { getUserInformation } from '../services/api';
 export default function MyTicketsPage() {
   const [user, setUser] = useState(null);
   const [tickets, setTickets] = useState([]);
@@ -15,24 +15,12 @@ export default function MyTicketsPage() {
       navigate('/login');
       return;
     }
+    
+    getUserInformation().then((data)=>{
+      setUser(data)
+    })
 
-    try {
-      // Разделяем токен на userId и role_id
-      const [userId, role_id] = token.split('.');
-      if (!userId || !role_id) {
-        throw new Error('Неверный формат токена');
-      }
-
-      setUser({
-        userId: parseInt(userId),
-        role_id: parseInt(role_id)
-      });
-    } catch (e) {
-      console.error('Ошибка декодирования токена:', e);
-      localStorage.removeItem('token');
-      navigate('/login');
-      return;
-    }
+    
 
     // Загружаем билеты
     fetch('http://localhost:5000/api/my-tickets', {
@@ -52,6 +40,7 @@ export default function MyTicketsPage() {
         if (Array.isArray(data)) {
           setTickets(data);
         } else {
+          console.log(data);
           setError('Не удалось загрузить билеты.');
         }
       })
@@ -62,6 +51,7 @@ export default function MyTicketsPage() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
+  
   // Обработчики кнопок
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -128,7 +118,7 @@ export default function MyTicketsPage() {
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
         }}>
           <h2 style={{ margin: '0 0 10px 0' }}>
-            Привет, {user.userId}
+            Привет, {user.name}
           </h2>
           <p><strong>Роль:</strong> {user.role_id === 1 ? 'Посетитель' : user.role_id === 2 ? 'Кассир' : 'Администратор'}</p>
         </div>
@@ -248,7 +238,7 @@ export default function MyTicketsPage() {
                 <p><strong>Дата:</strong> {new Date(ticket.start_time).toLocaleDateString()}</p>
                 <p><strong>Время:</strong> {new Date(ticket.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 <p><strong>Зал:</strong> {ticket.hall_name}</p>
-                <p><strong>Место:</strong> Ряд {ticket.row_num}, Место {ticket.seat_num}</p>
+                <p><strong>Место:</strong> {ticket.seat_num}</p>
                 <p style={{ fontWeight: 'bold', color: '#e50914' }}>
                   Цена: {ticket.price} ₽
                 </p>
