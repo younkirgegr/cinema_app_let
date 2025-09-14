@@ -3,17 +3,36 @@ const router = express.Router();
 const  sequelize  = require('../config/database');
 const authMiddleware = require('../middleware/auth')
 const checkRole = require('../middleware/role')
+const {QueryTypes} = require('sequelize')
+
+router.post("/", authMiddleware, checkRole(["Администратор"]), async (req, res) => {
+  const { film_id, hall_id, start_time, base_price, end_time } = req.body;
+
+  if (!film_id || !hall_id || !start_time || !base_price) {
+    return res.status(400).send({ message: "Все поля обязательны для заполнения" });
+  }
+
+  try {
+    const date = new Date(start_time);
+    const date2 = new Date(end_time)
+    if (isNaN(date.getTime()) && isNaN(date2.getTime())) {
+      return res.status(400).send({ message: "Неверный формат времени. Ожидается строка в формате ISO 8601." });
+    }
 
 
-router.post("/", authMiddleware,checkRole(["Администратор"]),async(req,res)=>{
-  const {film_id, hall_id,start_time,base_price} = req.body
+    await sequelize.query(
+      `INSERT INTO screenings (film_id, hall_id, start_time, end_time, base_price) VALUES (?, ?, ?, ?, ?)`,
+      { replacements: [film_id, hall_id, date, date2, base_price] }
+    );
 
-  if (!film_id || !hall_id || !start_time || !base_price) return res.status(400).send({error:"Неверный запрос!"})
-  
-  await sequelize.query(`INSERT INTO screenings (film_id,hall_id,start_time,base_price) VALUES (?,?,?,?)`,{replacements:[film_id,hall_id,start_time,base_price]})
+    return res.status(201).json({ message: "Сеанс успешно создан!" });
 
-  return res.status(200).json({message:"Операция выполнена успешно!"})
-})
+  } catch (error) {
+    console.error("Ошибка при создании сеанса:", error);
+    return res.status(500).json({ message: "Внутренняя ошибка сервера" });
+  }
+});
+
 
 router.get('/film/:filmId', async (req, res) => {
   const { filmId } = req.params;
@@ -119,6 +138,7 @@ router.patch("/:screening_id",authMiddleware,checkRole(["Администрат�
     Object.keys(body).forEach(key => {
       if (allowedFields.includes(key) && body[key] !== undefined) {
         setClauses.push(`${key} = ?`);
+        if (key==='start_time' || key=='end_time') body[key] = new Date(body[key])
         values.push(body[key]);
       }
     });

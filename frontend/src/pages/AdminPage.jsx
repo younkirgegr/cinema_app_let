@@ -99,12 +99,30 @@ export default function AdminPage() {
 
   const handleCreateSession = async () => {
     try {
-      await createScreening(sessionData);
+      const localTime = sessionData.start_time;
+      if (!localTime) {
+        alert("Пожалуйста, выберите время сеанса");
+        return;
+      }
+      
+      const date = new Date(localTime);
+
+
+      const utcTime = date.toISOString();
+
+      const dataToSend = {
+        ...sessionData,
+        start_time: utcTime 
+      };
+
+      await createScreening(dataToSend);
+
+
       alert('Сеанс создан!');
       setSessionData({ film_id: '', hall_id: '', start_time: '', base_price: '' });
-      setShowCreateSessionForm(false);
     } catch (err) {
       alert('Ошибка при создании сеанса');
+      console.error(err);
     }
   };
 
@@ -198,10 +216,19 @@ export default function AdminPage() {
               <option value="">Выберите зал</option>
               {halls.map(h => <option key={h.hall_id} value={h.hall_id}>{h.hall_name}</option>)}
             </select>
+            <label>Начало сеанса</label>
             <input
               type="datetime-local"
               value={sessionData.start_time}
               onChange={(e) => setSessionData({ ...sessionData, start_time: e.target.value })}
+              style={inputStyle}
+              required
+            />
+            <label>Конец сеанса</label>
+            <input
+              type="datetime-local"
+              value={sessionData.end_time}
+              onChange={(e) => setSessionData({ ...sessionData, end_time: e.target.value })}
               style={inputStyle}
               required
             />
