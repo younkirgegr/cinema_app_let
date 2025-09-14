@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt'); // ← добавь импорт
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 
 router.post('/login', async (req, res) => {

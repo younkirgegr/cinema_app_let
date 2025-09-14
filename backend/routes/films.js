@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
   try {
     const [films] = await sequelize.query(query, { replacements });
     console.log('Найдено фильмов:', films.length);
-    res.json(films); // ← Возвращаем JSON
+    res.json(films); 
   } catch (err) {
     console.error('Ошибка при получении фильмов:', err);
     res.status(500).json({ error: 'Ошибка при получении фильмов' });
@@ -151,7 +151,6 @@ router.patch("/:filmId", authMiddleware, checkRole(["Администратор"
   const { filmId } = req.params;
   const body = req.body;
 
-  // Оборачиваем ВСЁ в try...catch
   try { 
     const allowedFields = ['title', 'genre_id', 'duration_min', 'rating', 'description', 'release_date', 'poster_url', 'end_date'];
     const setClauses = [];

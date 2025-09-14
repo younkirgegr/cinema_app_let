@@ -1,9 +1,7 @@
-// backend/routes/tickets.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/database');
-
-// Маршрут для получения сеансов по ID фильма
+const authMiddleware = require('../middleware/auth')
 router.get('/film/:filmId', async (req, res) => {
   // Проверка: является ли req определённым
   if (!req) {
@@ -41,7 +39,6 @@ router.get('/film/:filmId', async (req, res) => {
   }
 });
 
-// ВОССТАНОВЛЕННЫЙ МАРШРУТ: для получения деталей конкретного сеанса
 router.get('/details/:screeningId', async (req, res) => {
   const { screeningId } = req.params;
 
@@ -72,8 +69,6 @@ router.get('/details/:screeningId', async (req, res) => {
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
-
-// ВОССТАНОВЛЕННЫЙ МАРШРУТ: для получения занятых мест
 router.get('/occupied/:screening_id', async (req, res) => {
   const { screening_id } = req.params;
 
@@ -170,5 +165,35 @@ router.get('/with-screenings', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении расписания' });
   }
 });
+
+router.post('/sell',authMiddleware, async (req,res)=>{
+  const {screeningId,selectedSeats} = req.body
+  const {userId} = req.user
+  const [result] = await sequelize.query("SELECT base_price from screenings WHERE screening_id=?",{replacements:[screeningId]});
+  if (!result) return res.status(400).json({message:"Неверный запрос"})
+  const base_price = result[0].base_price
+  const currentDate = new Date()
+  for (let i = 0; i<selectedSeats.length;i++){
+    const seat_id = selectedSeats[i]
+    await sequelize.query(`INSERT INTO 
+      tickets(screening_id,seat_id,user_id,cashier_id,sale_time,price,status,created_at)
+       VALUES (?,?,?,?,?,?,?,?)`,{replacements:[screeningId,
+      seat_id,
+      userId,
+      3,
+      currentDate,
+      base_price,
+      'active',
+      currentDate]});
+  }
+  return res.status(201).json({message:"Билет(ы) успешно создан(ы)"})
+})
+
+router.delete('/:ticket_id',authMiddleware,async (req,res)=>{
+  const {ticket_id} = req.params;
+  const {userId} = req.user
+  await sequelize.query("DELETE from tickets WHERE ticket_id=? AND user_id=?",{replacements:[ticket_id,userId]})
+  return res.status(201).json({message:"Успешно сдан билет!"})
+})
 
 module.exports = router;

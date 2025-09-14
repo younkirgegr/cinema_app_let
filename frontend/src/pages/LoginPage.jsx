@@ -8,17 +8,14 @@ export default function LoginPage() {
   const [userJustLoggedIn, setUserJustLoggedIn] = useState(false);
 
   const handleLoginSuccess = (userData) => {
-    console.log("✅ LoginPage: handleLoginSuccess вызван с данными:", userData);
+    console.log("LoginPage: handleLoginSuccess вызван с данными:", userData);
     setUserJustLoggedIn(true);
-    // Здесь можно также обновить состояние user в AppContent, если оно там через контекст или пропс
-    // Но для начала просто перенаправим
   };
 
   useEffect(() => {
      if (userJustLoggedIn) {
-        // Небольшая задержка для уверенности, что токен записался
         const timer = setTimeout(() => {
-           console.log("🔁 LoginPage: Перенаправление на главную...");
+           console.log(" LoginPage: Перенаправление на главную...");
            navigate('/'); // Перенаправляем на главную страницу
         }, 100);
         return () => clearTimeout(timer);

@@ -98,7 +98,7 @@ export default function SoonInCinemaPage() {
               cursor: 'pointer',
               fontSize: '16px'
             }}>
-              🔍
+              
             </button>
           </div>
           <button
@@ -187,7 +187,7 @@ export default function SoonInCinemaPage() {
 
       {/* Фильмы "Скоро в кино" */}
       <div style={{ marginBottom: '50px' }}>
-        <h2>🔜 Скоро в кино</h2>
+        <h2> Скоро в кино</h2>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',

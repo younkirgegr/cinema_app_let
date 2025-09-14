@@ -1,4 +1,3 @@
-// src/pages/AdminPage.jsx
 import { useState, useEffect } from 'react';
 import { getFilms, getHalls, addFilm, deleteFilm,updateFilm, createScreening } from '../services/api';
 import FilmForm from "../components/admin/FilmForm"
@@ -66,20 +65,20 @@ export default function AdminPage() {
 
   const handleEditFilm = async () => {
     try {
-      // 1. Отправляем запрос и ждем ответа
+      //Отправляем запрос и ждем ответа
       await updateFilm(editedFilm);
 
-      // 2. Обновляем массив фильмов в состоянии
+      //Обновляем массив фильмов в состоянии
       setFilms(currentFilms =>
         currentFilms.map(f => {
           if (f.film_id === editedFilm.film_id) {
-            return editedFilm; // Заменяем старый фильм на обновленный
+            return editedFilm; 
           }
           return f;
         })
       );
 
-      // 3. Закрываем модальное окно
+      // Закрываем модальное окно
       setShowRedactFilmForm(false);
       
       alert("Фильм успешно обновлен!");
@@ -162,7 +161,7 @@ export default function AdminPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
         {/* Управление фильмами */}
         <div style={cardStyle}>
-          <h2>🎥 Фильмы</h2>
+          <h2> Фильмы</h2>
           <button
             onClick={() => setShowAddFilmForm(true)}
             style={btnPrimary}
@@ -177,7 +176,7 @@ export default function AdminPage() {
                   <button style={{ ...btnSmall, marginRight: '5px' }} onClick={()=>{
                     setEditedFilm(f);
                     setShowRedactFilmForm(true);
-                    }}>✏️ Редактировать</button>
+                    }}> Редактировать</button>
                   <button style={{ ...btnSmall, backgroundColor: '#dc3545' }} onClick={()=>handleDeleteFilm(f.film_id)}>🗑 Удалить</button>
                 </div>
               </li>

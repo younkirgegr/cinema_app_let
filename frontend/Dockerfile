@@ -1,28 +1,12 @@
-# --- ЭТАП 1: Сборка ---
-
-FROM node:18-alpine AS build
+FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-ARG REACT_APP_API_URL
+EXPOSE 5173
 
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
-
-RUN npm run build
-
-# --- ЭТАП 2: Запуск (Serve) ---
-# Используем легковесный веб-сервер Nginx
-FROM nginx:stable-alpine
-
-# Копируем собранную статику из этапа 'build' в папку, откуда Nginx раздает файлы
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Открываем порт 80 (стандартный для Nginx)
-EXPOSE 80
-
-# Nginx запустится автоматически
+CMD ["npm", "run", "dev", "--", "--host"]

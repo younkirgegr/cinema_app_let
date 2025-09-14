@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserInformation } from '../services/api';
+import { getUserInformation,getMyTickets,dropTicket } from '../services/api';
 export default function MyTicketsPage() {
   const [user, setUser] = useState(null);
   const [tickets, setTickets] = useState([]);
@@ -23,19 +23,7 @@ export default function MyTicketsPage() {
     
 
     // Загружаем билеты
-    fetch('http://localhost:5000/api/my-tickets', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-      .then(res => {
-        if (res.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-          return;
-        }
-        return res.json();
-      })
+    getMyTickets()
       .then(data => {
         if (Array.isArray(data)) {
           setTickets(data);
@@ -145,7 +133,7 @@ export default function MyTicketsPage() {
             minWidth: '150px'
           }}
         >
-          ✏️ Редактировать профиль
+          Редактировать профиль
         </button>
 
         <button
@@ -161,7 +149,7 @@ export default function MyTicketsPage() {
             minWidth: '150px'
           }}
         >
-          🗑 Удалить аккаунт
+           Удалить аккаунт
         </button>
 
         <button
@@ -177,7 +165,7 @@ export default function MyTicketsPage() {
             minWidth: '150px'
           }}
         >
-          🔐 Выйти из аккаунта
+           Выйти из аккаунта
         </button>
       </div>
 
@@ -239,9 +227,23 @@ export default function MyTicketsPage() {
                 <p><strong>Время:</strong> {new Date(ticket.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 <p><strong>Зал:</strong> {ticket.hall_name}</p>
                 <p><strong>Место:</strong> {ticket.seat_num}</p>
-                <p style={{ fontWeight: 'bold', color: '#e50914' }}>
+                <p style={{ fontWeight: 'bold', color: '#f03f47ff' }}>
                   Цена: {ticket.price} ₽
                 </p>
+                  <div style={{display:"flex",justifyContent:"end"}}>
+                    <button style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#da372bff',
+                        color: 'black',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        maxWidth:"10vw"
+          }} onClick={()=>{
+            dropTicket(ticket.ticket_id)
+            setTickets(tickets.filter(t=>t.ticket_id!==ticket.ticket_id))
+          }}>Сдать билет</button>
+                  </div>
               </div>
             </div>
           ))}

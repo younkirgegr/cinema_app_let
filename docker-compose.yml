@@ -4,15 +4,16 @@ services:
   db:
     image: mysql:8.0
     container_name: cinema-db
+    command: ['--port=5001']
     environment:
       MYSQL_DATABASE: cinema
       MYSQL_USER: cinema_user
       MYSQL_PASSWORD: cinema_pass
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: masha2005
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
     ports:
-      - "3306:3306"
+      - "5001:5001"
     volumes:
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
       - ./sql/data.sql:/docker-entrypoint-initdb.d/2-data.sql
@@ -24,9 +25,11 @@ services:
     build: ./backend
     container_name: cinema-backend
     ports:
-      - "5000:5000"
+      - "5012:5012"
     environment:
+      - PORT=5012
       - DB_HOST=db
+      - DB_PORT=5001
     depends_on:
       - db
     restart: unless-stopped
@@ -34,13 +37,15 @@ services:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        - REACT_APP_API_URL=http://backend:5000/api
+    build: ./frontend
     container_name: cinema-frontend
     ports:
-      - "3000:80"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE=http://backend:5012/api
     depends_on:
       - backend
     restart: unless-stopped

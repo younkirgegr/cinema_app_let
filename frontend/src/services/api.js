@@ -1,16 +1,14 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
 
 
 
 const handleFetch = (url, options = {}) => {
   return fetch(url, options).then(async (res) => {
-    // Пытаемся получить тело ответа, даже если статус не 2xx
     const contentType = res.headers.get('content-type');
     let data;
     if (contentType && contentType.includes('application/json')) {
       data = await res.json();
     } else {
-      // Если ответ не JSON, попробуем текст или создадим объект с текстом статуса
       try {
         const text = await res.text();
         data = { message: text || `HTTP ${res.status}` };
@@ -20,18 +18,15 @@ const handleFetch = (url, options = {}) => {
     }
 
     if (!res.ok) {
-      // Если статус не OK, отклоняем промис с данными об ошибке
-      console.error(`❌ API Error (${res.status}):`, data);
+      console.error(` API Error (${res.status}):`, data);
       throw new Error(data.error || data.message || `Ошибка ${res.status}`);
     }
 
     // Если OK, возвращаем данные
-    console.log(`📥 API Success (${res.status}):`, data);
+    console.log(` API Success (${res.status}):`, data);
     return data;
   }).catch((err) => {
-    // Это поймает сетевые ошибки (например, ECONNREFUSED) и ошибки от `!res.ok`
-    console.error(`🌐 Network/Fetch Error:`, err);
-    // Пробрасываем ошибку дальше
+    console.error(` Network/Fetch Error:`, err);
     throw new Error(`Сетевая ошибка: ${err.message}`);
   });
 };
@@ -63,23 +58,19 @@ export const login = (email, password) => {
     body: JSON.stringify({ email, password })
   })
   .then(res => {
-    console.log(`📥 API Login Status: ${res.status}`); // Для отладки
+    console.log(` API Login Status: ${res.status}`); 
     if (!res.ok) {
-      // Если статус не 2xx, попытаемся получить сообщение об ошибке
-      return res.json().then(data => {
-        console.error("❌ API Login Error Data:", data); // Для отладки
+       return res.json().then(data => {
+        console.error(" API Login Error Data:", data); 
         throw new Error(data.error || `Ошибка ${res.status}`);
       });
     }
     return res.json();
   })
   .then(data => {
-    console.log("📥 API Login Success Data:", data); // Для отладки
-    return data;
+    console.log(" API Login Success Data:", data); 
   })
   .catch(err => {
-    console.error("🌐 API Login Network/Fetch Error:", err); // Для отладки
-    // Пробрасываем ошибку дальше с понятным сообщением
     throw new Error(`Сетевая ошибка: ${err.message}`);
   });
 };
@@ -91,7 +82,7 @@ export const getScreeningsToday = () => {
   }).then(res => res.json());
 };
 
-// Продажа билета
+
 export const sellTicket = (data) => {
   return fetch(`${API_BASE}/tickets/sell`, {
     method: 'POST',
@@ -202,3 +193,10 @@ export const getUserInformation = () => {
     headers: getHeaders()
   }).then(res => res.json());
 };
+
+export const dropTicket = (ticketId) =>{
+  return fetch(`${API_BASE}/tickets/${ticketId}`,{
+    headers:getHeaders(),
+    method:"DELETE"
+}).then((res)=>res.json())
+}

@@ -166,7 +166,7 @@ export default function HallScheme({ film, onClose, onSelectSession }) {
         </div>
 
         {/* Сеансы */}
-        <h3>📅 Сеансы</h3>
+        <h3> Сеансы</h3>
         {hasSessions ? (
           <div style={{
             display: 'grid',

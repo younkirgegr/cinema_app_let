@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { getScreeningDetails, getOccupiedSeats } from '../services/api';
+import { getScreeningDetails, getOccupiedSeats,sellTicket } from '../services/api';
 
 export default function SelectSeatsPage() {
   const { screeningId } = useParams();
@@ -198,11 +198,15 @@ export default function SelectSeatsPage() {
         </button>
 
         <button
-          onClick={() => {
+          onClick={async () => {
             if (selectedSeats.length === 0) {
               alert('Выберите хотя бы одно место');
               return;
             }
+            await sellTicket({
+              selectedSeats,
+              screeningId
+            })
             alert(`Билеты на ${selectedSeats.length} мест успешно куплены!`);
             window.location.href = '/my-tickets';
           }}

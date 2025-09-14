@@ -4,7 +4,7 @@ import { getScreeningsByFilmId } from '../services/api';
 
 export default function SchedulePage() {
   const [films, setFilms] = useState([]);
-  const [screenings, setScreenings] = useState([]); // ← Плоский список всех сеансов
+  const [screenings, setScreenings] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState('today');
 

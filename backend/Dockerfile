@@ -14,4 +14,4 @@ COPY . .
 EXPOSE 5000
 
 # Команда для запуска приложения
-CMD [ "node", "index.js" ] # или "npm", "start"
+CMD [ "node", "server.js" ]
